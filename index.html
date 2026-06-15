@@ -25,6 +25,35 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 10px; }
     .fade { animation: fadeIn 0.3s ease; }
+    /* ONBOARDING */
+    #onboarding { display:none; position:fixed; inset:0; background:#1a1a2e; z-index:200; overflow-y:auto; align-items:center; justify-content:center; flex-direction:column; padding:2rem 1.5rem; }
+    #onboarding.active { display:flex; }
+    .ob-card { background:#ffffff; border-radius:8px; padding:2.5rem 2rem; width:100%; max-width:480px; position:relative; overflow:hidden; animation:slideUp 0.35s ease; }
+    .ob-progress { position:absolute; top:0; left:0; right:0; height:3px; background:#e8e4dc; }
+    .ob-progress-fill { height:100%; background:#c9a84c; transition:width 0.4s ease; border-radius:0 2px 2px 0; }
+    .ob-module-num { font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase; color:#c9a84c; font-weight:600; margin-bottom:0.5rem; margin-top:0.25rem; }
+    .ob-icon { font-size:2.8rem; margin-bottom:0.85rem; line-height:1; display:block; }
+    .ob-title { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:700; color:#1a1a2e; line-height:1.2; margin-bottom:0.4rem; }
+    .ob-subtitle { font-size:0.83rem; color:#c9a84c; font-weight:600; margin-bottom:1.1rem; }
+    .ob-desc { font-size:0.9rem; color:#444; line-height:1.7; margin-bottom:1.2rem; }
+    .ob-tip { background:#f5f0e8; border:1px solid #e8d5a0; border-radius:4px; padding:0.85rem 1rem; font-size:0.83rem; color:#555; line-height:1.6; margin-bottom:1.8rem; }
+    .ob-perks { margin-bottom:1.8rem; }
+    .ob-perk { padding:0.55rem 0; font-size:0.88rem; color:#444; border-bottom:1px solid #e8e4dc; }
+    .ob-perk:last-child { border-bottom:none; }
+    .ob-actions { display:flex; gap:0.75rem; align-items:center; }
+    .ob-back { padding:0.75rem 1.1rem; border:1px solid #e8e4dc; background:transparent; color:#666; border-radius:2px; font-size:0.85rem; flex-shrink:0; }
+    .ob-next { flex:1; padding:0.85rem; border:none; border-radius:2px; font-size:0.9rem; font-weight:600; }
+    .ob-next.primary { background:#1a1a2e; color:#ffffff; }
+    .ob-next.gold { background:#c9a84c; color:#1a1a2e; }
+    .ob-skip { display:block; width:100%; text-align:center; margin-top:0.85rem; background:transparent; border:none; font-size:0.75rem; color:#bbb; }
+    .ob-logo { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:900; color:#ffffff; margin-bottom:2rem; text-align:center; }
+    .ob-logo span { color:#c9a84c; }
+    .ob-dots { display:flex; gap:0.5rem; margin-top:1.5rem; }
+    .ob-dot { height:8px; border-radius:4px; border:none; background:rgba(255,255,255,0.2); cursor:pointer; transition:all 0.3s; }
+    .ob-dot.active { background:#c9a84c; width:24px; }
+    .ob-dot:not(.active) { width:8px; }
+    .ob-footer { margin-top:1.5rem; font-size:0.7rem; color:rgba(255,255,255,0.25); text-align:center; }
+
 
     /* LAYOUT */
     #app { min-height: 100vh; display: flex; flex-direction: column; }
@@ -141,6 +170,29 @@
   </style>
 </head>
 <body>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="ob-logo">Avoca<span>IA</span></div>
+  <div class="ob-card">
+    <div class="ob-progress"><div class="ob-progress-fill" id="ob-progress-fill" style="width:0%"></div></div>
+    <div id="ob-module-num" class="ob-module-num" style="display:none"></div>
+    <span class="ob-icon" id="ob-icon"></span>
+    <h1 class="ob-title" id="ob-title"></h1>
+    <p class="ob-subtitle" id="ob-subtitle"></p>
+    <p class="ob-desc" id="ob-desc"></p>
+    <div class="ob-tip" id="ob-tip" style="display:none"></div>
+    <div class="ob-perks" id="ob-perks" style="display:none"></div>
+    <div class="ob-actions">
+      <button class="ob-back" id="ob-back" onclick="obPrev()" style="display:none">← Retour</button>
+      <button class="ob-next primary" id="ob-next" onclick="obNext()">Commencer →</button>
+    </div>
+    <button class="ob-skip" id="ob-skip" onclick="obComplete()">Passer l'introduction</button>
+  </div>
+  <div class="ob-dots" id="ob-dots"></div>
+  <p class="ob-footer">Accès bêta · 30 jours offerts · contact@avocaia.eu</p>
+</div>
+
 <div id="app">
   <!-- HEADER -->
   <header>
@@ -822,6 +874,74 @@ function addClient() {
   updateCRMBadge();
 }
 
+
+// ═══════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════
+const OB_STEPS = [
+  { icon:'⚖️', title:'Bienvenue dans AvocaIA', subtitle:'L'IA au service de votre cabinet', desc:'Vous faites partie des premiers avocats à accéder à AvocaIA. Voici un tour rapide de vos 4 modules en moins de 2 minutes.', cta:'Commencer la visite →' },
+  { icon:'✍️', num:'01', title:'Rédaction assistée', subtitle:'Courriers, conclusions, contrats en quelques secondes', desc:'Choisissez le type de document, renseignez le contexte en 3 champs, et l'IA génère un document juridique complet prêt à relire.', tip:'💡 Commencez par une mise en demeure ou une relance d'honoraires — c'est là que le gain de temps est le plus visible.', cta:'Suivant →' },
+  { icon:'📡', num:'02', title:'Veille juridique', subtitle:'Restez à jour sans effort', desc:'Sélectionnez vos domaines de spécialité et générez un bulletin de veille du jour. Ou posez directement une question juridique à l'IA.', tip:'💡 Essayez la recherche juridique : posez une question sur un dossier en cours et obtenez jurisprudence + textes applicables.', cta:'Suivant →' },
+  { icon:'📝', num:'03', title:'Contenu LinkedIn', subtitle:'Votre réputation en ligne, sans y passer du temps', desc:'Choisissez un type de post, décrivez votre sujet en 2 lignes, et obtenez un post LinkedIn professionnel prêt à publier.', tip:'💡 Générez votre planning de la semaine — 3 idées de posts calibrées pour votre spécialité avec les meilleurs créneaux.', cta:'Suivant →' },
+  { icon:'👥', num:'04', title:'CRM & Relances', subtitle:'Plus jamais d'honoraires oubliés', desc:'Ajoutez vos clients, suivez vos dossiers et générez des emails de relance en 1 clic. L'IA rédige, vous validez.', tip:'💡 Commencez par ajouter 2-3 dossiers en cours et générez une relance pour tester.', cta:'Suivant →' },
+  { icon:'🚀', title:'Vous êtes prêt !', subtitle:'30 jours d'accès complet offerts', desc:'Votre accès bêta est actif. Explorez les 4 modules et n'hésitez pas à nous écrire pour tout retour.', perks:['✅ Accès complet aux 4 modules','✅ Tarif bêta -50% à l'issue de la période','✅ Votre retour façonne le produit','✅ Support direct : contact@avocaia.eu'], cta:'Accéder à l'app →' },
+];
+
+let obStep = 0;
+
+function obRender() {
+  const st = OB_STEPS[obStep];
+  const total = OB_STEPS.length - 1;
+  const pct = (obStep / total) * 100;
+
+  document.getElementById('ob-progress-fill').style.width = pct + '%';
+  document.getElementById('ob-icon').textContent = st.icon;
+  document.getElementById('ob-title').textContent = st.title;
+  document.getElementById('ob-subtitle').textContent = st.subtitle;
+  document.getElementById('ob-desc').textContent = st.desc;
+
+  const numEl = document.getElementById('ob-module-num');
+  numEl.style.display = st.num ? 'block' : 'none';
+  if (st.num) numEl.textContent = 'Module ' + st.num + ' / 04';
+
+  const tipEl = document.getElementById('ob-tip');
+  tipEl.style.display = st.tip ? 'block' : 'none';
+  if (st.tip) tipEl.textContent = st.tip;
+
+  const perksEl = document.getElementById('ob-perks');
+  perksEl.style.display = st.perks ? 'block' : 'none';
+  if (st.perks) perksEl.innerHTML = st.perks.map(p => '<div class="ob-perk">'+p+'</div>').join('');
+
+  const nextBtn = document.getElementById('ob-next');
+  nextBtn.textContent = st.cta;
+  nextBtn.className = 'ob-next ' + (obStep === total ? 'gold' : 'primary');
+
+  document.getElementById('ob-back').style.display = obStep > 0 ? 'block' : 'none';
+  document.getElementById('ob-skip').style.display = obStep === total ? 'none' : 'block';
+
+  // Dots
+  const dotsEl = document.getElementById('ob-dots');
+  dotsEl.innerHTML = OB_STEPS.map((_, i) => '<button class="ob-dot '+(i===obStep?'active':'')+'" onclick="obGoTo('+i+')"></button>').join('');
+}
+
+function obNext() {
+  if (obStep === OB_STEPS.length - 1) { obComplete(); return; }
+  obStep++; obRender();
+}
+function obPrev() { if (obStep > 0) { obStep--; obRender(); } }
+function obGoTo(i) { obStep = i; obRender(); }
+function obComplete() {
+  localStorage.setItem('avocaia_onboarded', '1');
+  document.getElementById('onboarding').classList.remove('active');
+}
+
+function obInit() {
+  if (!localStorage.getItem('avocaia_onboarded')) {
+    document.getElementById('onboarding').classList.add('active');
+    obRender();
+  }
+}
+
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
@@ -829,6 +949,7 @@ renderRedaction();
 renderVeille();
 renderLinkedIn();
 renderCRM();
+obInit();
 </script>
 </body>
 </html>
