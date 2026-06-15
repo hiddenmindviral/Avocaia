@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AvocaIA — L'IA au service des avocats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #1a1a2e; --parchment: #f5f0e8; --gold: #c9a84c;
+      --goldLight: #e8d5a0; --crimson: #8b1a1a; --mist: #e8e4dc;
+      --white: #ffffff; --gray: #666; --green: #2d6a4f;
+      --greenLight: #d8f3dc; --orange: #c25f11; --orangeLight: #fde8d0;
+      --red: #9b1c1c; --redLight: #fde8e8; --blue: #0077b5;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    body { font-family: 'Inter', sans-serif; background: var(--parchment); color: var(--ink); }
+    input, textarea, select { font-family: 'Inter', sans-serif; }
+    input:focus, textarea:focus, select:focus { border-color: var(--gold) !important; background: var(--white) !important; outline: none; }
+    button { font-family: 'Inter', sans-serif; cursor: pointer; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 10px; }
+    .fade { animation: fadeIn 0.3s ease; }
+
+    /* LAYOUT */
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--ink); border-bottom: 1px solid rgba(201,168,76,0.15); position: sticky; top:0; z-index:20; }
+    .header-inner { max-width:1100px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; gap:1.5rem; height:60px; }
+    .logo { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:900; color:var(--white); flex-shrink:0; letter-spacing:-0.02em; }
+    .logo span { color:var(--gold); }
+    nav { display:flex; gap:0.25rem; flex:1; }
+    .nav-btn { display:flex; align-items:center; gap:0.45rem; padding:0.5rem 0.9rem; border:none; background:transparent; color:rgba(255,255,255,0.55); font-size:0.82rem; font-weight:400; border-radius:2px; transition:all 0.15s; position:relative; }
+    .nav-btn.active { background:rgba(201,168,76,0.15); color:var(--white); font-weight:600; }
+    .nav-btn .underline { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:2px; background:var(--gold); border-radius:2px; display:none; }
+    .nav-btn.active .underline { display:block; }
+    .nav-badge { background:var(--crimson); color:var(--white); font-size:0.6rem; font-weight:700; padding:0.1rem 0.35rem; border-radius:10px; }
+    .beta-badge { background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); border-radius:2px; padding:0.3rem 0.75rem; font-size:0.68rem; color:var(--gold); letter-spacing:0.08em; text-transform:uppercase; }
+
+    /* PAGE HEADER */
+    .page-header { background:var(--white); border-bottom:1px solid var(--mist); }
+    .page-header-inner { max-width:1100px; margin:0 auto; padding:1.2rem 2rem; }
+    .page-title { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:0.2rem; }
+    .page-sub { font-size:0.82rem; color:var(--gray); }
+
+    /* MAIN */
+    main { flex:1; max-width:1100px; width:100%; margin:0 auto; padding:2rem; }
+    .module { display:none; }
+    .module.active { display:block; animation:fadeIn 0.3s ease; }
+
+    /* FOOTER */
+    footer { background:var(--ink); border-top:1px solid rgba(201,168,76,0.12); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+    .footer-logo { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:900; color:var(--white); }
+    .footer-logo span { color:var(--gold); }
+    .footer-text { font-size:0.72rem; color:rgba(255,255,255,0.3); }
+
+    /* CARDS */
+    .card { background:var(--white); border:1px solid var(--mist); border-radius:2px; }
+    .card-pad { padding:1.5rem; }
+    .section-label { font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:0.85rem; }
+
+    /* FORMS */
+    .field { margin-bottom:0.9rem; }
+    .field-label { font-size:0.72rem; font-weight:600; color:#555; display:block; margin-bottom:0.35rem; letter-spacing:0.03em; }
+    .inp { width:100%; padding:0.65rem 0.9rem; border:1px solid var(--mist); border-radius:2px; font-size:0.87rem; color:var(--ink); background:var(--parchment); transition:all 0.15s; }
+    .ta { width:100%; padding:0.75rem 0.9rem; border:1px solid var(--mist); border-radius:2px; font-size:0.87rem; color:var(--ink); background:var(--parchment); resize:vertical; min-height:80px; transition:border-color 0.15s; font-family:'Inter',sans-serif; }
+    .sel { width:100%; padding:0.65rem 0.9rem; border:1px solid var(--mist); border-radius:2px; font-size:0.87rem; color:var(--ink); background:var(--parchment); }
+
+    /* BUTTONS */
+    .btn-primary { background:var(--ink); color:var(--white); border:none; padding:0.85rem 1.6rem; font-size:0.88rem; font-weight:600; border-radius:2px; display:inline-flex; align-items:center; gap:0.5rem; transition:background 0.2s; }
+    .btn-primary:hover { background:var(--crimson); }
+    .btn-primary:disabled { background:#555; cursor:not-allowed; }
+    .btn-outline { background:transparent; color:var(--gray); border:1px solid var(--mist); padding:0.55rem 1rem; font-size:0.8rem; border-radius:2px; transition:all 0.15s; }
+    .btn-outline:hover { border-color:var(--gold); color:var(--ink); }
+    .btn-copy { background:var(--ink); color:var(--white); border:none; padding:0.55rem 1.1rem; font-size:0.8rem; border-radius:2px; }
+    .btn-gold { background:var(--gold); color:var(--ink); border:none; padding:0.65rem 1.2rem; font-size:0.82rem; font-weight:700; border-radius:2px; }
+
+    /* OUTPUT */
+    .output-box { background:var(--parchment); border:1px solid var(--mist); border-radius:2px; padding:1.4rem; font-size:0.87rem; line-height:1.8; white-space:pre-wrap; color:var(--ink); }
+
+    /* PILLS */
+    .pill { padding:0.4rem 0.9rem; border:1px solid var(--mist); background:var(--parchment); border-radius:20px; font-size:0.78rem; color:var(--ink); transition:all 0.15s; }
+    .pill.active { border-color:var(--gold); background:rgba(201,168,76,0.1); font-weight:600; }
+
+    /* TABS */
+    .tabs { display:flex; border:1px solid var(--mist); border-radius:2px; overflow:hidden; background:var(--white); margin-bottom:1.5rem; }
+    .tab-btn { flex:1; padding:0.75rem; border:none; background:var(--white); color:var(--gray); font-size:0.82rem; font-weight:400; border-right:1px solid var(--mist); transition:all 0.15s; }
+    .tab-btn.active { background:var(--ink); color:var(--white); font-weight:600; }
+
+    /* GRIDS */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+
+    /* ERROR */
+    .error-box { background:#fff5f5; border:1px solid #fca5a5; border-radius:2px; padding:0.8rem; color:var(--crimson); font-size:0.83rem; margin-top:0.75rem; }
+
+    /* MODAL */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:50; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal { background:var(--white); border-radius:4px; padding:2rem; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; animation:slideUp 0.3s ease; }
+
+    /* STATUS BADGES */
+    .status { font-size:0.67rem; font-weight:600; padding:0.2rem 0.55rem; border-radius:20px; }
+
+    /* SPINNER */
+    .spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; display:inline-block; animation:spin 0.7s linear infinite; }
+
+    /* SIDEBAR */
+    .sidebar-nav { display:flex; flex-direction:column; gap:0.4rem; }
+    .sidebar-btn { display:flex; align-items:center; gap:0.6rem; padding:0.65rem 0.85rem; border:1px solid var(--mist); background:var(--parchment); border-radius:2px; text-align:left; font-size:0.8rem; color:var(--ink); transition:all 0.15s; }
+    .sidebar-btn.active { border-color:var(--gold); background:rgba(201,168,76,0.08); font-weight:600; }
+
+    /* CLIENT ROW */
+    .client-row { padding:1rem 1.5rem; display:flex; align-items:center; gap:1rem; cursor:pointer; background:var(--white); transition:background 0.15s; }
+    .client-row:hover { background:var(--parchment); }
+    .avatar { width:34px; height:34px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; color:var(--gold); flex-shrink:0; }
+
+    /* PROGRESS */
+    .progress-bar { height:8px; background:var(--mist); border-radius:4px; overflow:hidden; }
+    .progress-fill { height:100%; background:var(--gold); border-radius:4px; transition:width 0.5s; }
+
+    /* STICKY */
+    .sticky-top { position:sticky; top:1rem; }
+
+    /* LINKEDIN CARD */
+    .li-card { background:var(--white); border:1px solid var(--mist); border-radius:4px; overflow:hidden; }
+    .li-header { background:var(--blue); padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; }
+    .li-avatar { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--white); font-size:0.85rem; }
+    .li-body { padding:1.2rem; font-size:0.84rem; line-height:1.75; white-space:pre-wrap; color:var(--ink); max-height:360px; overflow-y:auto; }
+    .li-footer { padding:0.65rem 1rem; border-top:1px solid var(--mist); display:flex; gap:1rem; }
+
+    @media (max-width:768px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+      .header-inner { padding:0 1rem; gap:1rem; }
+      main { padding:1rem; }
+      nav { display:none; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">Avoca<span>IA</span></div>
+      <nav>
+        <button class="nav-btn active" onclick="showModule('redaction')">
+          ✍️ Rédaction <span class="underline"></span>
+        </button>
+        <button class="nav-btn" onclick="showModule('veille')">
+          📡 Veille <span class="underline"></span>
+        </button>
+        <button class="nav-btn" onclick="showModule('linkedin')">
+          📝 LinkedIn <span class="underline"></span>
+        </button>
+        <button class="nav-btn" onclick="showModule('crm')">
+          👥 CRM <span class="nav-badge" id="crm-badge">2</span> <span class="underline"></span>
+        </button>
+      </nav>
+      <div class="beta-badge">Bêta</div>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <h1 class="page-title" id="page-title">Rédaction assistée</h1>
+      <p class="page-sub" id="page-sub">Courriers, conclusions, contrats générés par l'IA</p>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ══ MODULE 1 : RÉDACTION ══ -->
+    <div id="mod-redaction" class="module active">
+      <div class="grid-2" style="grid-template-columns:200px 1fr">
+        <div class="sidebar-nav" id="doc-types"></div>
+        <div id="redaction-form"></div>
+      </div>
+    </div>
+
+    <!-- ══ MODULE 2 : VEILLE ══ -->
+    <div id="mod-veille" class="module">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="veilleTab('recherche')">🔍 Recherche</button>
+        <button class="tab-btn" onclick="veilleTab('bulletin')">📡 Bulletin du jour</button>
+        <button class="tab-btn" onclick="veilleTab('historique')">📁 Historique</button>
+      </div>
+      <div id="veille-content"></div>
+    </div>
+
+    <!-- ══ MODULE 3 : LINKEDIN ══ -->
+    <div id="mod-linkedin" class="module">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="liTab('creer')">✍️ Créer</button>
+        <button class="tab-btn" onclick="liTab('planning')">📅 Planning</button>
+        <button class="tab-btn" onclick="liTab('archives')">📁 Archives</button>
+      </div>
+      <div id="linkedin-content"></div>
+    </div>
+
+    <!-- ══ MODULE 4 : CRM ══ -->
+    <div id="mod-crm" class="module">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div class="tabs" style="margin-bottom:0;flex:1;margin-right:1rem">
+          <button class="tab-btn active" onclick="crmTab('dashboard')">📊 Dashboard</button>
+          <button class="tab-btn" onclick="crmTab('clients')">👥 Clients</button>
+          <button class="tab-btn" onclick="crmTab('relances')">🔔 Relances</button>
+        </div>
+        <button class="btn-gold" onclick="showAddClient()">+ Client</button>
+      </div>
+      <div id="crm-content"></div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Avoca<span>IA</span></div>
+    <div class="footer-text">© 2026 AvocaIA · contact@avocaia.eu · Bêta</div>
+  </footer>
+</div>
+
+<!-- MODAL RELANCE -->
+<div id="modal-relance" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeRelance()">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700">Relance IA</div>
+        <div style="font-size:0.78rem;color:var(--gray)" id="relance-client-name"></div>
+      </div>
+      <button onclick="closeRelance()" style="background:transparent;border:none;font-size:1.2rem;color:var(--gray)">✕</button>
+    </div>
+    <div class="section-label">Type de relance</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.2rem" id="relance-types"></div>
+    <button class="btn-primary" style="width:100%;margin-bottom:1.2rem;justify-content:center" onclick="genRelance()">
+      <span id="relance-btn-text">Générer l'email →</span>
+    </button>
+    <div id="relance-output" style="display:none">
+      <div class="output-box" id="relance-text" style="max-height:280px;overflow-y:auto"></div>
+      <div style="display:flex;gap:0.5rem;margin-top:0.85rem">
+        <button class="btn-copy" onclick="copyRelance()">Copier</button>
+        <button class="btn-outline" onclick="document.getElementById('relance-output').style.display='none'">Régénérer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD CLIENT -->
+<div id="modal-add-client" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeAddClient()">
+  <div class="modal" style="max-width:440px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700">Nouveau client</div>
+      <button onclick="closeAddClient()" style="background:transparent;border:none;font-size:1.2rem;color:var(--gray)">✕</button>
+    </div>
+    <div class="field"><label class="field-label">Nom</label><input class="inp" id="new-nom" placeholder="Martin Sophie" /></div>
+    <div class="field"><label class="field-label">Dossier</label><input class="inp" id="new-dossier" placeholder="Divorce amiable" /></div>
+    <div class="field"><label class="field-label">Honoraires (€)</label><input class="inp" type="number" id="new-honoraires" placeholder="3500" /></div>
+    <div class="field">
+      <label class="field-label">Statut</label>
+      <select class="sel" id="new-statut">
+        <option value="actif">Actif</option>
+        <option value="attente">En attente</option>
+        <option value="relance">À relancer</option>
+        <option value="clos">Clos</option>
+      </select>
+    </div>
+    <div class="field"><label class="field-label">Notes</label><textarea class="ta" id="new-notes" placeholder="RDV prévu le..." style="min-height:60px"></textarea></div>
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="addClient()">Ajouter →</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// API CALL
+// ═══════════════════════════════════════════════
+async function callClaude(prompt) {
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  const data = await res.json();
+  if (data.text) return data.text;
+  throw new Error(data.error || 'Erreur API');
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const PAGE_INFO = {
+  redaction: { title:'Rédaction assistée', sub:'Courriers, conclusions, contrats générés par l\'IA' },
+  veille:    { title:'Veille juridique', sub:'Jurisprudence et actualités dans vos domaines' },
+  linkedin:  { title:'Contenu LinkedIn', sub:'Posts et planning éditorial générés en 1 clic' },
+  crm:       { title:'CRM Clients', sub:'Suivi dossiers, honoraires et relances automatisées' },
+};
+
+function showModule(id) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mod-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_INFO[id].title;
+  document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+}
+
+// ═══════════════════════════════════════════════
+// MODULE 1 : RÉDACTION
+// ═══════════════════════════════════════════════
+const DOC_TYPES = [
+  { id:'mise_en_demeure', label:'⚖️ Mise en demeure', fields:[
+    {id:'destinataire',label:'Destinataire',ph:'M. Martin ou SARL Exemple'},
+    {id:'objet',label:'Objet du litige',ph:'Impayé facture — 4 500 €'},
+    {id:'delai',label:'Délai accordé',ph:'8 jours à compter de la réception'},
+    {id:'contexte',label:'Contexte',ph:'Date de la prestation, rappels...',area:true},
+  ]},
+  { id:'relance_honoraires', label:'💶 Relance honoraires', fields:[
+    {id:'client',label:'Client',ph:'Nom du client'},
+    {id:'montant',label:'Montant dû',ph:'2 800 € TTC'},
+    {id:'facture',label:'Référence facture',ph:'Facture n°2026-012'},
+    {id:'ton',label:'Ton souhaité',ph:'Courtois mais ferme'},
+  ]},
+  { id:'resiliation', label:'📋 Résiliation mandat', fields:[
+    {id:'destinataire',label:'Destinataire',ph:'Nom du client'},
+    {id:'mandat',label:'Type de mandat',ph:'Mandat de représentation'},
+    {id:'motif',label:'Motif',ph:'Divergence de stratégie...'},
+    {id:'date',label:'Date d\'effet',ph:'1er juillet 2026'},
+  ]},
+  { id:'conclusions', label:'📝 Trame conclusions', fields:[
+    {id:'juridiction',label:'Juridiction',ph:'Tribunal judiciaire de Paris'},
+    {id:'client',label:'Votre client',ph:'M. Dupont, demandeur'},
+    {id:'adverse',label:'Partie adverse',ph:'Société ABC, défenderesse'},
+    {id:'faits',label:'Faits',ph:'Résumez les faits...',area:true},
+    {id:'pretentions',label:'Prétentions',ph:'15 000 € + dépens',area:true},
+  ]},
+  { id:'contrat', label:'🤝 Contrat prestation', fields:[
+    {id:'client',label:'Client',ph:'Particulier ou société'},
+    {id:'mission',label:'Mission',ph:'Conseil en droit social'},
+    {id:'honoraires',label:'Honoraires',ph:'250 €/h ou forfait 3 000 €'},
+    {id:'modalites',label:'Modalités',ph:'Acompte, délais...',area:true},
+  ]},
+];
+
+let activeDocType = DOC_TYPES[0];
+let docFields = {};
+let cabinetName = '';
+let docOutput = '';
+
+function renderRedaction() {
+  // Sidebar
+  const sb = document.getElementById('doc-types');
+  sb.innerHTML = DOC_TYPES.map(d => `
+    <button class="sidebar-btn ${d.id===activeDocType.id?'active':''}" onclick="selectDocType('${d.id}')">
+      ${d.label}
+    </button>`).join('');
+
+  // Form
+  const form = document.getElementById('redaction-form');
+  form.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:1.2rem">
+      <div class="card card-pad">
+        <div class="section-label">Cabinet / Avocat</div>
+        <input class="inp" placeholder="Maître Dupont — Cabinet Dupont & Associés" value="${cabinetName}"
+          oninput="cabinetName=this.value" />
+      </div>
+      <div class="card card-pad">
+        <div class="section-label">Informations du document</div>
+        ${activeDocType.fields.map(f => `
+          <div class="field">
+            <label class="field-label">${f.label}</label>
+            ${f.area
+              ? `<textarea class="ta" placeholder="${f.ph}" oninput="docFields['${f.id}']=this.value">${docFields[f.id]||''}</textarea>`
+              : `<input class="inp" placeholder="${f.ph}" value="${docFields[f.id]||''}" oninput="docFields['${f.id}']=this.value" />`
+            }
+          </div>`).join('')}
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem"
+          id="doc-gen-btn" onclick="generateDoc()">Générer le document →</button>
+        <div id="doc-error"></div>
+      </div>
+      ${docOutput ? `
+        <div class="card card-pad fade">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <div class="section-label" style="margin:0">Document généré</div>
+            <div style="display:flex;gap:0.5rem">
+              <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('doc-output').textContent)">Copier</button>
+              <button class="btn-outline" onclick="docOutput='';renderRedaction()">Nouveau</button>
+            </div>
+          </div>
+          <div class="output-box" id="doc-output">${docOutput}</div>
+        </div>` : ''}
+    </div>`;
+}
+
+function selectDocType(id) {
+  activeDocType = DOC_TYPES.find(d=>d.id===id);
+  docFields = {};
+  docOutput = '';
+  renderRedaction();
+}
+
+async function generateDoc() {
+  const btn = document.getElementById('doc-gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Génération...';
+  const err = document.getElementById('doc-error');
+  err.innerHTML = '';
+  const fieldLines = activeDocType.fields.map(f=>`${f.label} : ${docFields[f.id]||'(non renseigné)'}`).join('\n');
+  const prompt = `Tu es un assistant juridique expert en droit français. Rédige un(e) ${activeDocType.label} professionnel(le) pour un avocat français.
+Cabinet : ${cabinetName||'Non renseigné'}
+${fieldLines}
+Instructions : formules juridiques françaises, en-têtes et formules de politesse appropriées, [entre crochets] les éléments manquants. Commence directement par le document.`;
+  try {
+    docOutput = await callClaude(prompt);
+    renderRedaction();
+  } catch(e) {
+    err.innerHTML = `<div class="error-box">Erreur : ${e.message}</div>`;
+    btn.disabled = false;
+    btn.innerHTML = 'Générer le document →';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MODULE 2 : VEILLE
+// ═══════════════════════════════════════════════
+const DOMAINES = [
+  {id:'affaires',label:'💼 Droit des affaires'},{id:'famille',label:'👨‍👩‍👧 Droit de la famille'},
+  {id:'penal',label:'⚖️ Droit pénal'},{id:'social',label:'🤝 Droit social'},
+  {id:'immo',label:'🏛️ Droit immobilier'},{id:'fiscal',label:'📊 Droit fiscal'},
+  {id:'contrats',label:'📋 Droit des contrats'},{id:'num',label:'💻 Droit du numérique'},
+];
+let veilleCurrentTab = 'recherche';
+let veilleQuery = '';
+let veilleResult = '';
+let veilleDomaines = [];
+let veilleDigest = '';
+let veilleHistory = [];
+
+function veilleTab(tab) {
+  veilleCurrentTab = tab;
+  document.querySelectorAll('#mod-veille .tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['recherche','bulletin','historique'][i]===tab);
+  });
+  renderVeille();
+}
+
+function renderVeille() {
+  const c = document.getElementById('veille-content');
+  if (veilleCurrentTab==='recherche') {
+    c.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:1.2rem">
+        <div class="section-label">Posez votre question juridique</div>
+        <textarea class="ta" style="min-height:90px" placeholder="Ex : Quelle est la jurisprudence sur le licenciement pour inaptitude ?"
+          oninput="veilleQuery=this.value">${veilleQuery}</textarea>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+          <button class="btn-primary" id="veille-btn" onclick="rechercherVeille()">Analyser →</button>
+          ${veilleResult?`<button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('veille-output').textContent)">Copier</button>`:''}
+        </div>
+      </div>
+      ${veilleResult
+        ? `<div class="card card-pad fade"><div class="output-box" id="veille-output">${veilleResult}</div></div>`
+        : `<div class="card" style="padding:2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:0.75rem">⚖️</div>
+            <p style="font-size:0.85rem;color:#aaa;margin-bottom:1rem">Exemples :</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center">
+              ${['Clause de non-concurrence : conditions ?','Délai prescription responsabilité civile','Licenciement faute grave : procédure'].map(ex=>
+                `<button class="pill" onclick="veilleQuery='${ex}';renderVeille()">${ex}</button>`).join('')}
+            </div>
+          </div>`}`;
+  } else if (veilleCurrentTab==='bulletin') {
+    c.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:1.2rem">
+        <div class="section-label">Vos domaines de spécialité</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.2rem">
+          ${DOMAINES.map(d=>`<button class="pill ${veilleDomaines.includes(d.id)?'active':''}" onclick="toggleDomaine('${d.id}')">${d.label}</button>`).join('')}
+        </div>
+        <button class="btn-primary" onclick="genDigest()" ${veilleDomaines.length===0?'disabled':''}>Générer le bulletin →</button>
+      </div>
+      ${veilleDigest?`<div class="card card-pad fade"><div class="output-box">${veilleDigest}</div><div style="margin-top:1rem;display:flex;gap:0.5rem"><button class="btn-copy" onclick="navigator.clipboard.writeText('${veilleDigest.replace(/'/g,"\\'")}')">Copier</button><button class="btn-outline" onclick="veilleHistory.unshift({text:veilleDigest,date:new Date().toLocaleDateString('fr-FR')});veilleTab('historique')">Sauvegarder</button></div></div>`:''}`;
+  } else {
+    c.innerHTML = veilleHistory.length===0
+      ? `<div class="card" style="padding:3rem;text-align:center"><div style="font-size:2rem;margin-bottom:0.75rem">📁</div><p style="font-size:0.85rem;color:#aaa">Vos bulletins sauvegardés ici.</p></div>`
+      : veilleHistory.map((h,i)=>`<div class="card card-pad" style="margin-bottom:0.75rem"><div style="display:flex;justify-content:space-between;margin-bottom:0.4rem"><span style="font-size:0.8rem;font-weight:600">Bulletin</span><span style="font-size:0.72rem;color:#aaa">${h.date}</span></div><p style="font-size:0.8rem;color:var(--gray);overflow:hidden;max-height:50px">${h.text.slice(0,180)}...</p><button class="btn-copy" style="margin-top:0.6rem" onclick="navigator.clipboard.writeText(veilleHistory[${i}].text)">Copier</button></div>`).join('');
+  }
+}
+
+function toggleDomaine(id) {
+  veilleDomaines = veilleDomaines.includes(id) ? veilleDomaines.filter(x=>x!==id) : [...veilleDomaines, id];
+  renderVeille();
+}
+
+async function rechercherVeille() {
+  if (!veilleQuery.trim()) return;
+  const btn = document.getElementById('veille-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Analyse...';
+  const prompt = `Tu es un expert en droit français. Un avocat te pose : "${veilleQuery}"
+Réponds ainsi :
+1. **Réponse directe** (2-3 phrases)
+2. **Jurisprudence clé** (2-3 décisions récentes)
+3. **Textes applicables**
+4. **Point de vigilance**`;
+  try { veilleResult = await callClaude(prompt); } catch(e) { veilleResult='Erreur : '+e.message; }
+  renderVeille();
+}
+
+async function genDigest() {
+  const labels = veilleDomaines.map(id=>DOMAINES.find(d=>d.id===id)?.label).join(', ');
+  const prompt = `Tu es un veilleur juridique. Génère un bulletin de veille du jour pour un avocat spécialisé en : ${labels}.
+Pour chaque domaine : 1 décision marquante, 1 évolution législative, 1 point de vigilance. Termine par une tendance du mois.`;
+  veilleDigest='Génération...'; renderVeille();
+  try { veilleDigest = await callClaude(prompt); } catch(e) { veilleDigest='Erreur : '+e.message; }
+  renderVeille();
+}
+
+// ═══════════════════════════════════════════════
+// MODULE 3 : LINKEDIN
+// ═══════════════════════════════════════════════
+const POST_TYPES = [
+  {id:'conseil',label:'💡 Conseil juridique',desc:'Un tip pratique'},
+  {id:'actualite',label:'📰 Actualité',desc:'Commenter une décision'},
+  {id:'story',label:'📖 Storytelling',desc:'Histoire de dossier'},
+  {id:'mythes',label:'🚫 Idées reçues',desc:'Déconstruire un mythe'},
+  {id:'liste',label:'📋 Liste pratique',desc:'X choses à savoir'},
+  {id:'carriere',label:'🎓 Mon parcours',desc:'Partager son expertise'},
+];
+const TONS = [{id:'pedagogique',l:'Pédagogique'},{id:'direct',l:'Direct'},{id:'narratif',l:'Narratif'},{id:'expert',l:'Expert'}];
+const LONGUEURS = [{id:'court',l:'Court ~150'},{id:'moyen',l:'Moyen ~300'},{id:'long',l:'Long ~500'}];
+const LEN_MAP = {court:150,moyen:300,long:500};
+
+let liCurrentTab='creer', liPostType=null, liTon='pedagogique', liLongueur='moyen';
+let liSujet='', liPrenom='', liSpec='', liResult='', liSaved=[], liPlanning='';
+
+function liTab(tab) {
+  liCurrentTab=tab;
+  document.querySelectorAll('#mod-linkedin .tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['creer','planning','archives'][i]===tab);
+  });
+  renderLinkedIn();
+}
+
+function renderLinkedIn() {
+  const c = document.getElementById('linkedin-content');
+  if (liCurrentTab==='creer') {
+    c.innerHTML = `
+      <div class="grid-2">
+        <div style="display:flex;flex-direction:column;gap:1.2rem">
+          <div class="card card-pad">
+            <div class="section-label">Votre profil</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+              <div><label class="field-label">Prénom</label><input class="inp" value="${liPrenom}" placeholder="Jean" oninput="liPrenom=this.value" /></div>
+              <div><label class="field-label">Spécialité</label><input class="inp" value="${liSpec}" placeholder="Droit social" oninput="liSpec=this.value" /></div>
+            </div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-label">Type de post</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+              ${POST_TYPES.map(p=>`<button class="sidebar-btn ${liPostType===p.id?'active':''}" onclick="liPostType='${p.id}';renderLinkedIn()">
+                <div><div style="font-size:0.78rem;font-weight:${liPostType===p.id?600:400}">${p.label}</div><div style="font-size:0.68rem;color:var(--gray)">${p.desc}</div></div>
+              </button>`).join('')}
+            </div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-label">Sujet</div>
+            <textarea class="ta" placeholder="Ex : La nouvelle jurisprudence sur les clauses de non-concurrence..." oninput="liSujet=this.value">${liSujet}</textarea>
+            <div style="margin-top:1rem">
+              <div class="section-label">Ton</div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
+                ${TONS.map(t=>`<button class="pill ${liTon===t.id?'active':''}" onclick="liTon='${t.id}';renderLinkedIn()">${t.l}</button>`).join('')}
+              </div>
+              <div style="display:flex;gap:0.5rem">
+                ${LONGUEURS.map(l=>`<button class="pill ${liLongueur===l.id?'active':''}" style="flex:1;text-align:center;border-radius:2px" onclick="liLongueur='${l.id}';renderLinkedIn()">${l.l}</button>`).join('')}
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" style="width:100%;justify-content:center" id="li-gen-btn"
+            onclick="genLinkedIn()" ${!liPostType||!liSujet.trim()?'disabled':''}>Générer le post →</button>
+        </div>
+        <div class="sticky-top">
+          ${liResult ? `
+            <div class="fade">
+              <div class="li-card" style="margin-bottom:1rem">
+                <div class="li-header">
+                  <div class="li-avatar">${liPrenom?.[0]||'A'}</div>
+                  <div><div style="font-size:0.8rem;font-weight:600;color:white">${liPrenom||'Avocat'}${liSpec?' — '+liSpec:''}</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6)">LinkedIn · Maintenant</div></div>
+                </div>
+                <div class="li-body">${liResult}</div>
+                <div class="li-footer">
+                  <span style="font-size:0.7rem;color:var(--gray)">👍 J'aime</span>
+                  <span style="font-size:0.7rem;color:var(--gray)">💬 Commenter</span>
+                  <span style="font-size:0.7rem;color:var(--gray)">🔁 Partager</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:0.5rem">
+                <button class="btn-copy" onclick="navigator.clipboard.writeText(liResult)">Copier</button>
+                <button class="btn-outline" onclick="liSaved.unshift({text:liResult,sujet:liSujet,date:new Date().toLocaleDateString('fr-FR')});alert('Sauvegardé !')">Sauvegarder</button>
+                <button class="btn-outline" onclick="liResult='';renderLinkedIn()">Nouveau</button>
+              </div>
+            </div>` : `
+            <div class="card" style="padding:3rem;text-align:center">
+              <div style="font-size:2rem;color:var(--blue);font-weight:900;margin-bottom:0.75rem">in</div>
+              <p style="font-size:0.85rem;color:#aaa">Votre post apparaît ici,<br>prêt à copier-coller.</p>
+            </div>`}
+        </div>
+      </div>`;
+  } else if (liCurrentTab==='planning') {
+    c.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:1.2rem">
+        <div class="section-label">Planning de la semaine</div>
+        <p style="font-size:0.85rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">3 idées de posts calibrées pour votre spécialité, avec les meilleurs créneaux.</p>
+        <button class="btn-primary" id="planning-btn" onclick="genPlanning()">Générer mon planning →</button>
+      </div>
+      ${liPlanning?`<div class="card card-pad fade"><div class="output-box">${liPlanning}</div></div>`:''}`;
+  } else {
+    c.innerHTML = liSaved.length===0
+      ? `<div class="card" style="padding:3rem;text-align:center"><div style="font-size:2rem;margin-bottom:0.75rem">📁</div><p style="font-size:0.85rem;color:#aaa">Vos posts sauvegardés ici.</p></div>`
+      : liSaved.map((p,i)=>`<div class="card card-pad" style="margin-bottom:0.75rem"><div style="display:flex;justify-content:space-between;margin-bottom:0.4rem"><span style="font-size:0.8rem;font-weight:600">${p.sujet.slice(0,50)}</span><span style="font-size:0.72rem;color:#aaa">${p.date}</span></div><p style="font-size:0.78rem;color:var(--gray);overflow:hidden;max-height:50px">${p.text.slice(0,150)}...</p><button class="btn-copy" style="margin-top:0.6rem" onclick="navigator.clipboard.writeText(liSaved[${i}].text)">Copier</button></div>`).join('');
+  }
+}
+
+async function genLinkedIn() {
+  const btn = document.getElementById('li-gen-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Rédaction...';
+  const type = POST_TYPES.find(p=>p.id===liPostType);
+  const prompt = `Expert en personal branding pour avocats LinkedIn.
+Post pour : ${liPrenom||"l'avocat"}, spécialité ${liSpec||'droit général'}.
+Type : ${type?.label} | Sujet : ${liSujet} | Ton : ${liTon} | ~${LEN_MAP[liLongueur]} mots
+Règles : accroche forte ligne 1, phrases courtes, sauts de ligne, valeur concrète, CTA subtil, 5 hashtags. Ne commence pas par "Je". Génère uniquement le post.`;
+  try { liResult = await callClaude(prompt); } catch(e) { liResult='Erreur : '+e.message; }
+  renderLinkedIn();
+}
+
+async function genPlanning() {
+  const btn = document.getElementById('planning-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Génération...';
+  const prompt = `Expert content marketing pour avocats LinkedIn. Planning semaine pour : ${liPrenom||"l'avocat"}, spécialisé ${liSpec||'droit général'}.
+3 posts (lundi, mercredi, vendredi) avec : jour + heure optimale, type et angle, accroche suggérée, temps estimé.`;
+  try { liPlanning = await callClaude(prompt); } catch(e) { liPlanning='Erreur : '+e.message; }
+  renderLinkedIn();
+}
+
+// ═══════════════════════════════════════════════
+// MODULE 4 : CRM
+// ═══════════════════════════════════════════════
+const STATUTS = {
+  actif:   {label:'Actif',       color:'var(--green)',  bg:'var(--greenLight)'},
+  attente: {label:'En attente',  color:'var(--orange)', bg:'var(--orangeLight)'},
+  relance: {label:'À relancer',  color:'var(--red)',    bg:'var(--redLight)'},
+  clos:    {label:'Clos',        color:'var(--gray)',   bg:'var(--mist)'},
+};
+const RELANCE_TYPES = [
+  {id:'honoraires',label:'💶 Honoraires impayés'},
+  {id:'documents', label:'📄 Documents manquants'},
+  {id:'rdv',       label:'📅 Prise de RDV'},
+  {id:'nouvelles', label:'👋 Prise de nouvelles'},
+  {id:'signature', label:'✍️ Signature en attente'},
+];
+let crmClients = [
+  {id:1,nom:'Martin Sophie',   dossier:'Divorce amiable',     statut:'actif',  honoraires:3200,paye:1600,contact:'Il y a 5 jours', notes:'RDV prévu le 20 juin'},
+  {id:2,nom:'Durand Pierre',   dossier:'Licenciement abusif', statut:'relance',honoraires:4500,paye:0,   contact:'Il y a 21 jours',notes:'Facture n°2026-034 en attente'},
+  {id:3,nom:'Leroy Entreprises',dossier:'Contrat commercial',  statut:'attente',honoraires:2800,paye:2800,contact:'Il y a 8 jours', notes:'En attente documents signés'},
+  {id:4,nom:'Bernard Claire',  dossier:'Succession',          statut:'actif',  honoraires:5100,paye:2550,contact:'Il y a 2 jours', notes:'Dossier en cours'},
+];
+let crmTab_='dashboard', crmSelected=null, crmRelanceClient=null, crmRelanceType='honoraires';
+
+function crmTab(tab) {
+  crmTab_=tab; crmSelected=null;
+  document.querySelectorAll('#mod-crm .tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['dashboard','clients','relances'][i]===tab);
+  });
+  renderCRM();
+}
+
+function updateCRMBadge() {
+  const n = crmClients.filter(c=>c.statut==='relance').length;
+  document.getElementById('crm-badge').textContent = n;
+}
+
+function renderCRM() {
+  const c = document.getElementById('crm-content');
+  const totalCA = crmClients.reduce((s,c)=>s+c.honoraires,0);
+  const totalP  = crmClients.reduce((s,c)=>s+c.paye,0);
+  const impaye  = totalCA-totalP;
+  const pct     = totalCA>0?Math.round(totalP/totalCA*100):0;
+  const urgents = crmClients.filter(c=>c.statut==='relance');
+
+  if (crmTab_==='dashboard') {
+    c.innerHTML = `
+      <div class="grid-4" style="margin-bottom:1.5rem">
+        ${[
+          {l:'Dossiers actifs',v:crmClients.filter(c=>c.statut!=='clos').length,u:'',col:'var(--ink)'},
+          {l:'CA total',v:totalCA.toLocaleString('fr-FR'),u:'€',col:'var(--ink)'},
+          {l:'Encaissé',v:totalP.toLocaleString('fr-FR'),u:'€',col:'var(--green)'},
+          {l:'Impayés',v:impaye.toLocaleString('fr-FR'),u:'€',col:'var(--crimson)'},
+        ].map(s=>`<div class="card card-pad"><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:0.4rem">${s.l}</div><div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:${s.col}">${s.v}<span style="font-size:0.9rem">${s.u}</span></div></div>`).join('')}
+      </div>
+      <div class="card card-pad" style="margin-bottom:1.2rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem">
+          <div class="section-label" style="margin:0">Taux d'encaissement</div>
+          <span style="font-size:0.82rem;font-weight:600">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="card card-pad">
+        <div class="section-label">Urgences</div>
+        ${urgents.length===0
+          ? `<p style="font-size:0.85rem;color:var(--gray)">✅ Aucune relance urgente.</p>`
+          : urgents.map(client=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--mist)">
+              <div>
+                <div style="font-size:0.85rem;font-weight:600">${client.nom}</div>
+                <div style="font-size:0.73rem;color:var(--gray)">${client.dossier} · ${client.contact}</div>
+              </div>
+              <button class="btn-primary" style="padding:0.4rem 0.9rem;font-size:0.75rem" onclick="openRelance(${client.id})">Relancer →</button>
+            </div>`).join('')}
+      </div>`;
+  } else if (crmTab_==='clients') {
+    c.innerHTML = `
+      <div class="card" style="overflow:hidden;margin-bottom:1rem">
+        ${crmClients.map((client,i)=>{
+          const s = STATUTS[client.statut];
+          const imp = client.honoraires-client.paye;
+          return `<div class="client-row ${crmSelected?.id===client.id?'':''}${i<crmClients.length-1?'border-bottom':''}"
+            style="${crmSelected?.id===client.id?'background:var(--parchment)':''}${i<crmClients.length-1?';border-bottom:1px solid var(--mist)':''}"
+            onclick="crmSelected=crmSelected?.id===${client.id}?null:crmClients[${i}];renderCRM()">
+            <div class="avatar">${client.nom[0]}</div>
+            <div style="flex:1"><div style="font-size:0.86rem;font-weight:600">${client.nom}</div><div style="font-size:0.74rem;color:var(--gray)">${client.dossier}</div></div>
+            <div style="text-align:right;flex-shrink:0"><div style="font-size:0.82rem;font-weight:600;color:${imp>0?'var(--crimson)':'var(--green)'}">${imp>0?'-'+imp.toLocaleString('fr-FR')+'€':'✓ Soldé'}</div><div style="font-size:0.7rem;color:var(--gray)">${client.contact}</div></div>
+            <div class="status" style="background:${s.bg};color:${s.color};flex-shrink:0">${s.label}</div>
+          </div>`;}).join('')}
+      </div>
+      ${crmSelected?`
+        <div class="card card-pad fade">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem">
+            <div><div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700">${crmSelected.nom}</div><div style="font-size:0.8rem;color:var(--gray)">${crmSelected.dossier}</div></div>
+            <div style="display:flex;gap:0.5rem">
+              <button class="btn-primary" style="padding:0.5rem 1rem;font-size:0.78rem" onclick="openRelance(${crmSelected.id})">✉️ Relance IA</button>
+              <button style="background:transparent;color:var(--crimson);border:1px solid var(--crimson);cursor:pointer;padding:0.5rem 0.75rem;border-radius:2px;font-size:0.78rem" onclick="crmClients=crmClients.filter(x=>x.id!==${crmSelected.id});crmSelected=null;renderCRM();updateCRMBadge()">Supprimer</button>
+            </div>
+          </div>
+          <div class="grid-3">
+            ${[{l:'Honoraires',v:crmSelected.honoraires.toLocaleString('fr-FR')+' €'},{l:'Encaissé',v:crmSelected.paye.toLocaleString('fr-FR')+' €'},{l:'Restant',v:(crmSelected.honoraires-crmSelected.paye).toLocaleString('fr-FR')+' €'}].map(s=>`<div style="background:var(--parchment);padding:0.85rem;border-radius:2px"><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray);margin-bottom:0.3rem">${s.l}</div><div style="font-size:1rem;font-weight:700">${s.v}</div></div>`).join('')}
+          </div>
+          ${crmSelected.notes?`<div style="margin-top:0.85rem;padding:0.75rem;background:var(--parchment);border-radius:2px;font-size:0.82rem;color:var(--gray)">📝 ${crmSelected.notes}</div>`:''}
+        </div>`:''}`; 
+  } else {
+    const relances = crmClients.filter(c=>c.statut==='relance');
+    c.innerHTML = relances.length===0
+      ? `<div class="card" style="padding:3rem;text-align:center"><div style="font-size:2rem;margin-bottom:0.75rem">✅</div><p style="font-size:0.85rem;color:var(--gray)">Aucune relance urgente.</p></div>`
+      : relances.map(client=>`
+          <div class="card card-pad" style="margin-bottom:1rem">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+              <div>
+                <div style="font-size:0.88rem;font-weight:600">${client.nom}</div>
+                <div style="font-size:0.74rem;color:var(--gray);margin-bottom:0.4rem">${client.dossier}</div>
+                <div style="background:var(--redLight);color:var(--red);font-size:0.7rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:20px;display:inline-block">Dernier contact : ${client.contact}</div>
+              </div>
+              <div style="text-align:right"><div style="font-size:1rem;font-weight:700;color:var(--crimson)">${(client.honoraires-client.paye).toLocaleString('fr-FR')} €</div><div style="font-size:0.7rem;color:var(--gray)">impayé</div></div>
+            </div>
+            <button class="btn-primary" style="font-size:0.82rem" onclick="openRelance(${client.id})">✉️ Générer relance IA →</button>
+          </div>`).join('');
+  }
+}
+
+function openRelance(id) {
+  crmRelanceClient = crmClients.find(c=>c.id===id);
+  document.getElementById('relance-client-name').textContent = crmRelanceClient.nom + ' — ' + crmRelanceClient.dossier;
+  const types = document.getElementById('relance-types');
+  types.innerHTML = RELANCE_TYPES.map(t=>`<button class="pill ${crmRelanceType===t.id?'active':''}" onclick="crmRelanceType='${t.id}';document.querySelectorAll('#relance-types .pill').forEach((b,i)=>b.classList.toggle('active',['honoraires','documents','rdv','nouvelles','signature'][i]==='${t.id}'))">${t.label}</button>`).join('');
+  document.getElementById('relance-output').style.display='none';
+  document.getElementById('modal-relance').style.display='flex';
+}
+
+function closeRelance() { document.getElementById('modal-relance').style.display='none'; }
+
+async function genRelance() {
+  const c = crmRelanceClient;
+  const type = RELANCE_TYPES.find(t=>t.id===crmRelanceType);
+  const btn = document.querySelector('#modal-relance .btn-primary');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Rédaction...';
+  const prompt = `Rédige un email de relance professionnel pour un avocat.
+Client : ${c.nom} | Dossier : ${c.dossier} | Type : ${type.label}
+${crmRelanceType==='honoraires'?`Montant impayé : ${c.honoraires-c.paye} €`:''}
+Dernier contact : ${c.contact} | Notes : ${c.notes}
+Règles : professionnel et chaleureux, 5-8 lignes, formule de politesse, laisse [NOM DE L'AVOCAT]. Commence par "Objet : ..."`;
+  try {
+    const text = await callClaude(prompt);
+    document.getElementById('relance-text').textContent = text;
+    document.getElementById('relance-output').style.display='block';
+  } catch(e) {
+    document.getElementById('relance-text').textContent = 'Erreur : '+e.message;
+    document.getElementById('relance-output').style.display='block';
+  }
+  btn.disabled=false; btn.innerHTML='Générer l\'email →';
+}
+
+function copyRelance() {
+  navigator.clipboard.writeText(document.getElementById('relance-text').textContent);
+  const btn = event.currentTarget;
+  btn.textContent='✓ Copié !';
+  setTimeout(()=>btn.textContent='Copier',2000);
+}
+
+function showAddClient() { document.getElementById('modal-add-client').style.display='flex'; }
+function closeAddClient() { document.getElementById('modal-add-client').style.display='none'; }
+
+function addClient() {
+  const nom = document.getElementById('new-nom').value.trim();
+  const dossier = document.getElementById('new-dossier').value.trim();
+  if (!nom || !dossier) return;
+  crmClients.unshift({
+    id:Date.now(), nom, dossier,
+    statut:document.getElementById('new-statut').value,
+    honoraires:parseInt(document.getElementById('new-honoraires').value)||0,
+    paye:0, contact:'Aujourd\'hui',
+    notes:document.getElementById('new-notes').value
+  });
+  closeAddClient();
+  renderCRM();
+  updateCRMBadge();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderRedaction();
+renderVeille();
+renderLinkedIn();
+renderCRM();
+</script>
+</body>
+</html>
