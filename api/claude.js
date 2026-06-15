@@ -17,15 +17,16 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-opus-4-5',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
     const data = await response.json();
-    if (data.content?.[0]?.text) return res.status(200).json({ text: data.content[0].text });
-    return res.status(500).json({ error: 'Réponse invalide' });
+    // Renvoie toute la réponse pour déboguer
+    return res.status(200).json({ text: data?.content?.[0]?.text || null, debug: data });
   } catch (error) {
-    return res.status(500).json({ error: 'Erreur serveur' });
+    return res.status(500).json({ error: error.message });
   }
 }
+
