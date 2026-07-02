@@ -657,12 +657,7 @@ const RELANCE_TYPES = [
   {id:'nouvelles', label:'👋 Prise de nouvelles'},
   {id:'signature', label:'✍️ Signature en attente'},
 ];
-let crmClients = [
-  {id:1,nom:'Martin Sophie',   dossier:'Divorce amiable',     statut:'actif',  honoraires:3200,paye:1600,contact:'Il y a 5 jours', notes:'RDV prévu le 20 juin'},
-  {id:2,nom:'Durand Pierre',   dossier:'Licenciement abusif', statut:'relance',honoraires:4500,paye:0,   contact:'Il y a 21 jours',notes:'Facture n°2026-034 en attente'},
-  {id:3,nom:'Leroy Entreprises',dossier:'Contrat commercial',  statut:'attente',honoraires:2800,paye:2800,contact:'Il y a 8 jours', notes:'En attente documents signés'},
-  {id:4,nom:'Bernard Claire',  dossier:'Succession',          statut:'actif',  honoraires:5100,paye:2550,contact:'Il y a 2 jours', notes:'Dossier en cours'},
-];
+let crmClients = [];
 let crmTab_='dashboard', crmSelected=null, crmRelanceClient=null, crmRelanceType='honoraires';
 
 function crmTab(tab) {
