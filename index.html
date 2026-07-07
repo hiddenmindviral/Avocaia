@@ -80,34 +80,44 @@
 
     /* MOBILE NAV */
     @media (max-width: 768px) {
-      nav { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+      nav { 
+        padding: 0.6rem 1rem; 
+        flex-direction: column;
+        gap: 0;
+      }
+      .nav-top { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
       .nav-logo { font-size: 1.1rem; }
       .beta-badge { display: none; }
       .user-info { display: none; }
       .nav-modules { 
-        display: flex; 
-        overflow-x: auto; 
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        gap: 0;
-        width: 100%;
-        border-top: 1px solid rgba(255,255,255,0.08);
-        padding-top: 0.5rem;
+        display: flex !important; 
+        overflow-x: auto !important; 
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        width: 100% !important;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 0.4rem;
+        gap: 0.25rem;
       }
       .nav-modules::-webkit-scrollbar { display: none; }
       .nav-btn { 
-        flex-shrink: 0;
-        font-size: 0.72rem; 
-        padding: 0.4rem 0.75rem;
-        white-space: nowrap;
+        flex-shrink: 0 !important;
+        font-size: 0.72rem !important; 
+        padding: 0.35rem 0.65rem !important;
+        white-space: nowrap !important;
       }
-      .nav-btn span:first-child { display: none; }
       main { padding: 1rem; }
       .page-header { padding: 1rem; }
       .page-header-inner { flex-direction: column; gap: 0.75rem; }
       .card { margin-bottom: 1rem; }
       .output-grid { grid-template-columns: 1fr !important; }
-      #mod-analyse main > div { grid-template-columns: 1fr !important; }
+      #mod-analyse div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
     }
 
     /* FOOTER */
@@ -233,19 +243,26 @@
     <div class="header-inner">
       <div class="logo">Avoca<span>IA</span></div>
       <nav>
-        <button class="nav-btn active" onclick="showModule('redaction')">
+        <div class="nav-top" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div class="nav-logo">Avoca<span>IA</span></div>
+          
+          
+        </div>
+        <div class="nav-modules" style="display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;width:100%;">
+          <button class="nav-btn active" onclick="showModule('redaction')">
           ✍️ Rédaction <span class="underline"></span>
         </button>
-        <div class="nav-modules"><button class="nav-btn" onclick="showModule('veille')">
+          <button class="nav-btn" onclick="showModule('veille')">
           📡 Veille <span class="underline"></span>
         </button>
-        <button class="nav-btn" onclick="showModule('linkedin')">
+          <button class="nav-btn" onclick="showModule('linkedin')">
           📝 LinkedIn <span class="underline"></span>
         </button>
-        <button class="nav-btn" onclick="showModule('crm')">
+          <button class="nav-btn" onclick="showModule('crm')">
           👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
         </button>
-        <button class="nav-btn" onclick="showModule('analyse')"><span>📄</span> Analyse <span class="underline"></span></button></div>
+          <button class="nav-btn" onclick="showModule('analyse')"><span>📄</span> Analyse <span class="underline"></span></button>
+        </div>
       </nav>
       <div class="beta-badge">Bêta</div><div class="user-info"><span class="user-email-display" id="user-email-display"></span><button class="btn-logout" onclick="logoutUser()">Déconnexion</button></div>
     </div>
