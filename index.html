@@ -120,6 +120,27 @@
       #mod-analyse div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
     }
 
+
+    /* HAMBURGER MOBILE */
+    .hamburger { display:none; background:transparent; border:none; cursor:pointer; padding:0.5rem; }
+    .hamburger span { display:block; width:22px; height:2px; background:var(--white); margin:4px 0; border-radius:2px; transition:0.3s; }
+    .mobile-menu { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--ink); z-index:9998; flex-direction:column; align-items:center; justify-content:center; gap:1rem; }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu-btn { background:transparent; border:1px solid rgba(201,168,76,0.3); color:var(--white); padding:1rem 2rem; border-radius:4px; font-size:1.1rem; cursor:pointer; font-family:"Inter",sans-serif; width:80%; text-align:center; transition:all 0.2s; }
+    .mobile-menu-btn:hover, .mobile-menu-btn.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+    .mobile-menu-close { position:absolute; top:1.5rem; right:1.5rem; background:transparent; border:none; color:var(--white); font-size:1.5rem; cursor:pointer; }
+    @media (max-width: 768px) {
+      .hamburger { display:block; margin-left:auto; }
+      .nav-modules { display:none !important; }
+      .beta-badge { display:none; }
+      .user-info { display:none; }
+      nav { padding:0.75rem 1.25rem; }
+      main { padding:1rem; }
+      .page-header { padding:1rem; }
+      .page-header-inner { flex-direction:column; gap:0.75rem; }
+      .output-grid { grid-template-columns:1fr !important; }
+    }
+
     /* FOOTER */
     footer { background:var(--ink); border-top:1px solid rgba(201,168,76,0.12); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
     .footer-logo { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:900; color:var(--white); }
@@ -211,6 +232,17 @@
 </head>
 <body>
 <!-- LOGIN SCREEN -->
+
+<!-- MENU MOBILE -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+  <button class="mobile-menu-btn" onclick="mobileShowModule('redaction')">✍️ Rédaction</button>
+  <button class="mobile-menu-btn" onclick="mobileShowModule('veille')">📡 Veille juridique</button>
+  <button class="mobile-menu-btn" onclick="mobileShowModule('linkedin')">📝 LinkedIn</button>
+  <button class="mobile-menu-btn" onclick="mobileShowModule('crm')">👥 CRM & Relances</button>
+  <button class="mobile-menu-btn" onclick="mobileShowModule('analyse')">📄 Analyse de documents</button>
+</div>
+
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">Avoca<span>IA</span></div>
@@ -263,7 +295,10 @@
         </button>
           <button class="nav-btn" onclick="showModule('analyse')"><span>📄</span> Analyse <span class="underline"></span></button>
         </div>
-      </nav>
+      
+        <button class="hamburger" onclick="toggleMobileMenu()" id="hamburger-btn">
+          <span></span><span></span><span></span>
+        </button></nav>
       <div class="beta-badge">Bêta</div><div class="user-info"><span class="user-email-display" id="user-email-display"></span><button class="btn-logout" onclick="logoutUser()">Déconnexion</button></div>
     </div>
   </header>
@@ -996,6 +1031,25 @@ function addClient() {
   updateCRMBadge();
 }
 
+
+
+// ─── MENU MOBILE ──────────────────────────────
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+function mobileShowModule(id) {
+  document.getElementById('mobile-menu').classList.remove('open');
+  // Simuler le clic sur le bon bouton nav
+  document.querySelectorAll('.module').forEach(m => { m.classList.remove('active'); m.style.display='none'; });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mobile-menu-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('mod-' + id);
+  if(el) { el.classList.add('active'); el.style.display='block'; }
+  if(document.getElementById('page-title') && PAGE_INFO[id]) {
+    document.getElementById('page-title').textContent = PAGE_INFO[id].title;
+    document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+  }
+}
 
 // ═══════════════════════════════════════════════
 // FIREBASE AUTH
