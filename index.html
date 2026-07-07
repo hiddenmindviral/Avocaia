@@ -210,7 +210,7 @@
           📝 LinkedIn <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('crm')">
-          👥 CRM <span class="nav-badge" id="crm-badge">2</span> <span class="underline"></span>
+          👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('analyse')"><span>📄</span> Analyse <span class="underline"></span></button>
       </nav>
@@ -293,8 +293,8 @@
             <div id="drop-zone" onclick="document.getElementById('file-input').click()" style="border:2px dashed var(--mist);border-radius:4px;padding:2rem;text-align:center;cursor:pointer;margin-bottom:1rem">
               <div style="font-size:2rem;margin-bottom:0.5rem">📄</div>
               <p style="font-size:0.85rem;color:var(--gray)">Cliquez pour sélectionner un fichier</p>
-              <p style="font-size:0.75rem;color:#aaa">PDF, Word, TXT</p>
-              <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="handleFileSelect(event)" />
+              <p style="font-size:0.75rem;color:#aaa">PDF, Word, TXT, Images (JPG, PNG)</p>
+              <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp" style="display:none" onchange="handleFileSelect(event)" />
             </div>
             <div id="file-info" style="display:none;background:var(--parchment);border:1px solid var(--mist);border-radius:4px;padding:0.75rem;font-size:0.85rem;margin-bottom:1rem">
               📄 <span id="file-name"></span>
@@ -1012,6 +1012,8 @@ auth.onAuthStateChanged(user => {
 // ═══════════════════════════════════════════════
 let fileContent = null;
 let fileName = null;
+let fileIsBase64 = false;
+let fileType = "text";
 
 function handleFileSelect(e) {
   const file = e.target.files[0];
@@ -1023,8 +1025,15 @@ function processFile(file) {
   document.getElementById('file-info').style.display = 'block';
   document.getElementById('drop-zone').style.display = 'none';
   const reader = new FileReader();
-  reader.onload = e => { fileContent = e.target.result; };
-  reader.readAsText(file);
+  const isImage = file.type.startsWith('image/');
+  const isPdf = file.type === 'application/pdf';
+  if(isImage || isPdf) {
+    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = true; fileType = isImage ? 'image' : 'pdf'; };
+    reader.readAsDataURL(file);
+  } else {
+    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = false; fileType = 'text'; };
+    reader.readAsText(file);
+  }
 }
 function clearFile() {
   fileContent = null; fileName = null;
@@ -1049,9 +1058,21 @@ async function analyseDocument() {
   document.getElementById('analyse-result').style.display='none';
   document.getElementById('analyse-loading').style.display='block';
   btn.disabled=true; btn.textContent='Analyse en cours...';
-  const prompt = `Tu es un assistant juridique expert en droit français. ${typeLabels[type]}\n\nDocument "${fileName}":\n${ctx?'Instructions: '+ctx+'\n':''}\n${fileContent.substring(0,8000)}\n\nRéponds en français avec une analyse structurée et professionnelle.`;
+  let requestBody;
+  if(fileIsBase64 && fileType === 'image') {
+    const base64Data = fileContent.split(',')[1];
+    const mimeType = fileContent.split(';')[0].split(':')[1];
+    requestBody = {
+      prompt: `Tu es un assistant juridique expert en droit français. ${typeLabels[type]}\n\nDocument image: "${fileName}"\n${ctx?'Instructions: '+ctx:''}\n\nAnalyse ce document image et réponds en français avec une analyse structurée et professionnelle.`,
+      image: { data: base64Data, mediaType: mimeType }
+    };
+  } else {
+    requestBody = {
+      prompt: `Tu es un assistant juridique expert en droit français. ${typeLabels[type]}\n\nDocument "${fileName}":\n${ctx?'Instructions: '+ctx+'\n':''}\n${fileContent ? fileContent.substring(0,8000) : ''}\n\nRéponds en français avec une analyse structurée et professionnelle.`
+    };
+  }
   try {
-    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requestBody)});
     const data = await res.json();
     const text = data.content?.[0]?.text || data.result || 'Erreur.';
     document.getElementById('analyse-content').textContent = text;
