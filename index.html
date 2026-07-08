@@ -98,6 +98,45 @@
       #mod-analyse .output-grid { grid-template-columns:1fr !important; }
     }
 
+
+    /* BOTTOM NAV MOBILE */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--ink);
+      border-top: 1px solid rgba(201,168,76,0.3);
+      z-index: 1000;
+      padding: 0.4rem 0;
+    }
+    .bottom-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .bottom-nav-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      padding: 0.3rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      font-family: 'Inter', sans-serif;
+      min-width: 60px;
+    }
+    .bottom-nav-btn .bn-icon { font-size: 1.3rem; line-height: 1; }
+    .bottom-nav-btn .bn-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .bottom-nav-btn.active { color: var(--gold); }
+    @media (max-width: 768px) {
+      .bottom-nav { display: block; }
+      #app { padding-bottom: 65px; }
+    }
+
     /* FOOTER */
     footer { background:var(--ink); border-top:1px solid rgba(201,168,76,0.12); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
     .footer-logo { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:900; color:var(--white); }
@@ -379,6 +418,33 @@
       </div>
     </div>
   </main>
+</div>
+
+
+<!-- BOTTOM NAV MOBILE -->
+<div class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-btn active" id="bn-redaction" onclick="bottomNav('redaction')">
+      <span class="bn-icon">✍️</span>
+      <span class="bn-label">Rédaction</span>
+    </button>
+    <button class="bottom-nav-btn" id="bn-veille" onclick="bottomNav('veille')">
+      <span class="bn-icon">📡</span>
+      <span class="bn-label">Veille</span>
+    </button>
+    <button class="bottom-nav-btn" id="bn-linkedin" onclick="bottomNav('linkedin')">
+      <span class="bn-icon">📝</span>
+      <span class="bn-label">LinkedIn</span>
+    </button>
+    <button class="bottom-nav-btn" id="bn-crm" onclick="bottomNav('crm')">
+      <span class="bn-icon">👥</span>
+      <span class="bn-label">CRM</span>
+    </button>
+    <button class="bottom-nav-btn" id="bn-analyse" onclick="bottomNav('analyse')">
+      <span class="bn-icon">📄</span>
+      <span class="bn-label">Analyse</span>
+    </button>
+  </div>
 </div>
 
 <footer>
@@ -983,6 +1049,34 @@ function addClient() {
   updateCRMBadge();
 }
 
+
+
+// ── BOTTOM NAV MOBILE ────────────────────────────
+function bottomNav(id) {
+  // Cacher tous les modules
+  document.querySelectorAll('.module').forEach(m => { 
+    m.classList.remove('active'); 
+    m.style.display = 'none'; 
+  });
+  // Afficher le bon module
+  const el = document.getElementById('mod-' + id);
+  if(el) { el.classList.add('active'); el.style.display = 'block'; }
+  // Mettre à jour le titre
+  if(PAGE_INFO && PAGE_INFO[id]) {
+    if(document.getElementById('page-title')) document.getElementById('page-title').textContent = PAGE_INFO[id].title;
+    if(document.getElementById('page-sub')) document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+  }
+  // Mettre à jour les boutons bottom nav
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('bn-' + id);
+  if(btn) btn.classList.add('active');
+  // Mettre à jour nav desktop
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-' + id);
+  if(navBtn) navBtn.classList.add('active');
+  // Scroll vers le haut
+  window.scrollTo(0, 0);
+}
 
 // ═══════════════════════════════════════════════
 // FIREBASE AUTH
