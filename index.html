@@ -76,7 +76,7 @@
     .btn-logout { background:transparent; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.5); padding:0.3rem 0.75rem; border-radius:2px; font-size:0.72rem; cursor:pointer; font-family:'Inter',sans-serif; }
 
     /* HAMBURGER MOBILE */
-    .hamburger { display:none; background:transparent; border:none; cursor:pointer; padding:0.4rem; margin-left:auto; }
+    .hamburger { background:transparent; border:none; cursor:pointer; padding:0.5rem; margin-left:auto; }
     .hamburger span { display:block; width:20px; height:2px; background:#fff; margin:4px 0; border-radius:2px; }
     .mobile-menu { display:none; position:fixed; inset:0; background:var(--ink); z-index:9997; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:2rem; }
     .mobile-menu.open { display:flex; }
@@ -85,14 +85,17 @@
     .mobile-close { position:absolute; top:1.5rem; right:1.5rem; background:transparent; border:none; color:#fff; font-size:1.8rem; cursor:pointer; line-height:1; }
     @media (max-width: 768px) {
       .nav-modules-desktop { display:none !important; }
-      .hamburger { display:block; }
-      .beta-badge { display:none; }
-      .user-info { display:none; }
+      .hamburger { display:flex !important; flex-direction:column !important; justify-content:center !important; align-items:center !important; }
+      .beta-badge { display:none !important; }
+      .user-info { display:none !important; }
+      nav { padding:0 1rem; justify-content:space-between; }
+      .nav-logo { flex:1; }
       main { padding:1rem; }
       .page-header { padding:1rem 1rem 0; }
       .page-header-inner { flex-direction:column; gap:0.5rem; align-items:flex-start; }
       .output-grid { grid-template-columns:1fr !important; }
       .card { margin-bottom:1rem; }
+      #mod-analyse .output-grid { grid-template-columns:1fr !important; }
     }
 
     /* FOOTER */
@@ -240,12 +243,14 @@
           📝 LinkedIn <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('crm')">
-          👥 CRM <span class="nav-badge" id="crm-badge">2</span> <span class="underline"></span>
+          👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('analyse')" id="nav-analyse">📄 Analyse <span class="underline"></span></button>
         </div>
-        <button class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')">
-          <span></span><span></span><span></span>
+        <button class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')" style="background:transparent;border:none;cursor:pointer;padding:0.5rem;margin-left:auto;">
+          <span style="display:block;width:22px;height:2px;background:#ffffff;margin:4px 0;border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:#ffffff;margin:4px 0;border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:#ffffff;margin:4px 0;border-radius:2px;"></span>
         </button></nav>
       <div class="beta-badge">Bêta</div><div class="user-info"><span class="user-email-display" id="user-email-display"></span><button class="btn-logout" onclick="logoutUser()">Déconnexion</button></div>
     </div>
