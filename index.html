@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AvocaIA — L'IA au service des avocats</title>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -28,29 +27,6 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 10px; }
     .fade { animation: fadeIn 0.3s ease; }
-    /* LOGIN */
-    #login-screen { position:fixed; inset:0; background:var(--ink); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:2rem; }
-    #login-screen.hidden { display:none; }
-    .login-card { background:var(--white); border-radius:6px; padding:2.5rem 2rem; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
-    .login-logo { font-family:"Playfair Display",serif; font-size:1.8rem; font-weight:900; color:var(--ink); text-align:center; margin-bottom:0.25rem; }
-    .login-logo span { color:var(--gold); }
-    .login-sub { font-size:0.82rem; color:var(--gray); text-align:center; margin-bottom:1.8rem; }
-    .login-inp { width:100%; padding:0.8rem 1rem; border:1px solid var(--mist); border-radius:2px; font-size:0.9rem; margin-bottom:0.75rem; font-family:"Inter",sans-serif; background:var(--parchment); outline:none; }
-    .login-inp:focus { border-color:var(--gold); background:var(--white); }
-    .login-btn { width:100%; padding:0.85rem; background:var(--ink); color:var(--white); border:none; border-radius:2px; font-size:0.92rem; font-weight:600; cursor:pointer; font-family:"Inter",sans-serif; margin-bottom:0.75rem; }
-    .login-google { width:100%; padding:0.85rem; background:var(--white); color:var(--ink); border:1px solid var(--mist); border-radius:2px; font-size:0.88rem; font-weight:500; cursor:pointer; font-family:"Inter",sans-serif; display:flex; align-items:center; justify-content:center; gap:0.6rem; }
-    .login-google:hover { border-color:var(--gold); }
-    .login-divider { text-align:center; font-size:0.75rem; color:#aaa; margin:0.75rem 0; }
-    .login-toggle { text-align:center; font-size:0.8rem; color:var(--gray); margin-top:1rem; }
-    .login-toggle a { color:var(--gold); cursor:pointer; font-weight:600; }
-    .login-error { background:#fde8e8; color:#9b1c1c; font-size:0.8rem; padding:0.6rem; border-radius:2px; margin-bottom:0.75rem; display:none; }
-    .login-error.show { display:block; }
-    .login-note { font-size:0.7rem; color:rgba(255,255,255,0.3); text-align:center; margin-top:1rem; line-height:1.5; }
-    .user-info { margin-left:auto; display:flex; align-items:center; gap:0.75rem; }
-    .user-email-display { font-size:0.72rem; color:rgba(255,255,255,0.4); }
-    .btn-logout { background:transparent; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.5); padding:0.3rem 0.75rem; border-radius:2px; font-size:0.72rem; cursor:pointer; font-family:"Inter",sans-serif; }
-    .btn-logout:hover { border-color:var(--gold); color:var(--gold); }
-
 
     /* LAYOUT */
     #app { min-height: 100vh; display: flex; flex-direction: column; }
@@ -78,67 +54,45 @@
     .module.active { display:block; animation:fadeIn 0.3s ease; }
 
 
-    /* MOBILE NAV */
-    @media (max-width: 768px) {
-      nav { 
-        padding: 0.6rem 1rem; 
-        flex-direction: column;
-        gap: 0;
-      }
-      .nav-top { 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between;
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-      .nav-logo { font-size: 1.1rem; }
-      .beta-badge { display: none; }
-      .user-info { display: none; }
-      .nav-modules { 
-        display: flex !important; 
-        overflow-x: auto !important; 
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none !important;
-        width: 100% !important;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        padding-top: 0.4rem;
-        gap: 0.25rem;
-      }
-      .nav-modules::-webkit-scrollbar { display: none; }
-      .nav-btn { 
-        flex-shrink: 0 !important;
-        font-size: 0.72rem !important; 
-        padding: 0.35rem 0.65rem !important;
-        white-space: nowrap !important;
-      }
-      main { padding: 1rem; }
-      .page-header { padding: 1rem; }
-      .page-header-inner { flex-direction: column; gap: 0.75rem; }
-      .card { margin-bottom: 1rem; }
-      .output-grid { grid-template-columns: 1fr !important; }
-      #mod-analyse div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
-    }
 
+    #login-screen { position:fixed; inset:0; background:var(--ink); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:2rem; }
+    #login-screen.hidden { display:none; }
+    .login-card { background:var(--white); border-radius:6px; padding:2.5rem 2rem; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+    .login-logo { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:900; color:var(--ink); text-align:center; margin-bottom:0.25rem; }
+    .login-logo span { color:var(--gold); }
+    .login-sub { font-size:0.82rem; color:var(--gray); text-align:center; margin-bottom:1.5rem; }
+    .login-inp { width:100%; padding:0.8rem 1rem; border:1px solid var(--mist); border-radius:2px; font-size:0.9rem; margin-bottom:0.75rem; font-family:'Inter',sans-serif; background:var(--parchment); outline:none; box-sizing:border-box; }
+    .login-inp:focus { border-color:var(--gold); background:var(--white); }
+    .login-btn { width:100%; padding:0.85rem; background:var(--ink); color:var(--white); border:none; border-radius:2px; font-size:0.92rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; margin-bottom:0.75rem; }
+    .login-google { width:100%; padding:0.85rem; background:var(--white); color:var(--ink); border:1px solid var(--mist); border-radius:2px; font-size:0.88rem; cursor:pointer; font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center; gap:0.6rem; }
+    .login-divider { text-align:center; font-size:0.75rem; color:#aaa; margin:0.75rem 0; }
+    .login-toggle { text-align:center; font-size:0.8rem; color:var(--gray); margin-top:1rem; }
+    .login-toggle a { color:var(--gold); cursor:pointer; font-weight:600; }
+    .login-error { background:#fde8e8; color:#9b1c1c; font-size:0.8rem; padding:0.6rem; border-radius:2px; margin-bottom:0.75rem; display:none; }
+    .login-error.show { display:block; }
+    .login-note { font-size:0.7rem; color:rgba(255,255,255,0.3); text-align:center; margin-top:1rem; line-height:1.5; max-width:400px; }
+    .user-info { margin-left:auto; display:flex; align-items:center; gap:0.75rem; }
+    .user-email-display { font-size:0.72rem; color:rgba(255,255,255,0.4); }
+    .btn-logout { background:transparent; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.5); padding:0.3rem 0.75rem; border-radius:2px; font-size:0.72rem; cursor:pointer; font-family:'Inter',sans-serif; }
 
     /* HAMBURGER MOBILE */
-    .hamburger { display:none; background:transparent; border:none; cursor:pointer; padding:0.5rem; }
-    .hamburger span { display:block; width:22px; height:2px; background:var(--white); margin:4px 0; border-radius:2px; transition:0.3s; }
-    .mobile-menu { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--ink); z-index:9998; flex-direction:column; align-items:center; justify-content:center; gap:1rem; }
+    .hamburger { display:none; background:transparent; border:none; cursor:pointer; padding:0.4rem; margin-left:auto; }
+    .hamburger span { display:block; width:20px; height:2px; background:#fff; margin:4px 0; border-radius:2px; }
+    .mobile-menu { display:none; position:fixed; inset:0; background:var(--ink); z-index:9997; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:2rem; }
     .mobile-menu.open { display:flex; }
-    .mobile-menu-btn { background:transparent; border:1px solid rgba(201,168,76,0.3); color:var(--white); padding:1rem 2rem; border-radius:4px; font-size:1.1rem; cursor:pointer; font-family:"Inter",sans-serif; width:80%; text-align:center; transition:all 0.2s; }
-    .mobile-menu-btn:hover, .mobile-menu-btn.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
-    .mobile-menu-close { position:absolute; top:1.5rem; right:1.5rem; background:transparent; border:none; color:var(--white); font-size:1.5rem; cursor:pointer; }
+    .mobile-menu-btn { width:100%; max-width:320px; background:transparent; border:1px solid rgba(201,168,76,0.3); color:#fff; padding:1rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer; font-family:'Inter',sans-serif; text-align:left; }
+    .mobile-menu-btn:active { background:var(--gold); color:var(--ink); }
+    .mobile-close { position:absolute; top:1.5rem; right:1.5rem; background:transparent; border:none; color:#fff; font-size:1.8rem; cursor:pointer; line-height:1; }
     @media (max-width: 768px) {
-      .hamburger { display:block; margin-left:auto; }
-      .nav-modules { display:none !important; }
+      .nav-modules-desktop { display:none !important; }
+      .hamburger { display:block; }
       .beta-badge { display:none; }
       .user-info { display:none; }
-      nav { padding:0.75rem 1.25rem; }
       main { padding:1rem; }
-      .page-header { padding:1rem; }
-      .page-header-inner { flex-direction:column; gap:0.75rem; }
+      .page-header { padding:1rem 1rem 0; }
+      .page-header-inner { flex-direction:column; gap:0.5rem; align-items:flex-start; }
       .output-grid { grid-template-columns:1fr !important; }
+      .card { margin-bottom:1rem; }
     }
 
     /* FOOTER */
@@ -231,18 +185,18 @@
   </style>
 </head>
 <body>
-<!-- LOGIN SCREEN -->
 
 <!-- MENU MOBILE -->
 <div class="mobile-menu" id="mobile-menu">
-  <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
-  <button class="mobile-menu-btn" onclick="mobileShowModule('redaction')">✍️ Rédaction</button>
-  <button class="mobile-menu-btn" onclick="mobileShowModule('veille')">📡 Veille juridique</button>
-  <button class="mobile-menu-btn" onclick="mobileShowModule('linkedin')">📝 LinkedIn</button>
-  <button class="mobile-menu-btn" onclick="mobileShowModule('crm')">👥 CRM & Relances</button>
-  <button class="mobile-menu-btn" onclick="mobileShowModule('analyse')">📄 Analyse de documents</button>
+  <button class="mobile-close" onclick="document.getElementById('mobile-menu').classList.remove('open')">✕</button>
+  <button class="mobile-menu-btn" onclick="mobileGo('redaction')">✍️&nbsp; Rédaction assistée</button>
+  <button class="mobile-menu-btn" onclick="mobileGo('veille')">📡&nbsp; Veille juridique</button>
+  <button class="mobile-menu-btn" onclick="mobileGo('linkedin')">📝&nbsp; Contenu LinkedIn</button>
+  <button class="mobile-menu-btn" onclick="mobileGo('crm')">👥&nbsp; CRM & Relances</button>
+  <button class="mobile-menu-btn" onclick="mobileGo('analyse')">📄&nbsp; Analyse de documents</button>
 </div>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">Avoca<span>IA</span></div>
@@ -266,7 +220,7 @@
       <p class="login-toggle">Déjà un compte ? <a onclick="toggleForm()">Se connecter</a></p>
     </div>
   </div>
-  <p class="login-note">Ne saisissez jamais de données client identifiables dans l'app.<br>Utilisez des pseudonymes ou références de dossiers.</p>
+  <p class="login-note">Ne saisissez jamais de données client identifiables.<br>Utilisez des pseudonymes ou références de dossiers.</p>
 </div>
 
 <div id="app" style="display:none">
@@ -275,28 +229,22 @@
     <div class="header-inner">
       <div class="logo">Avoca<span>IA</span></div>
       <nav>
-        <div class="nav-top" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <div class="nav-logo">Avoca<span>IA</span></div>
-          
-          
-        </div>
-        <div class="nav-modules" style="display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;width:100%;">
+        <div class="nav-modules-desktop" style="display:flex;align-items:center;">
           <button class="nav-btn active" onclick="showModule('redaction')">
-          Rédaction <span class="underline"></span>
+          ✍️ Rédaction <span class="underline"></span>
         </button>
-          <button class="nav-btn" onclick="showModule('veille')">
-          Veille <span class="underline"></span>
+        <button class="nav-btn" onclick="showModule('veille')">
+          📡 Veille <span class="underline"></span>
         </button>
-          <button class="nav-btn" onclick="showModule('linkedin')">
-          LinkedIn <span class="underline"></span>
+        <button class="nav-btn" onclick="showModule('linkedin')">
+          📝 LinkedIn <span class="underline"></span>
         </button>
-          <button class="nav-btn" onclick="showModule('crm')">
-          👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
+        <button class="nav-btn" onclick="showModule('crm')">
+          👥 CRM <span class="nav-badge" id="crm-badge">2</span> <span class="underline"></span>
         </button>
-          <button class="nav-btn" onclick="showModule('analyse')">Analyse <span class="underline"></span></button>
+        <button class="nav-btn" onclick="showModule('analyse')" id="nav-analyse">📄 Analyse <span class="underline"></span></button>
         </div>
-      
-        <button class="hamburger" onclick="toggleMobileMenu()" id="hamburger-btn">
+        <button class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')">
           <span></span><span></span><span></span>
         </button></nav>
       <div class="beta-badge">Bêta</div><div class="user-info"><span class="user-email-display" id="user-email-display"></span><button class="btn-logout" onclick="logoutUser()">Déconnexion</button></div>
@@ -370,9 +318,9 @@
     </div>
   </div>
   <main>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+    <div class="output-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
       <div>
-        <div class="card" style="margin-bottom:1.5rem">
+        <div class="card">
           <div class="card-header"><span>📎</span> Document</div>
           <div class="card-body">
             <div id="drop-zone" onclick="document.getElementById('file-input').click()" style="border:2px dashed var(--mist);border-radius:4px;padding:2rem;text-align:center;cursor:pointer;margin-bottom:1rem">
@@ -407,7 +355,7 @@
       </div>
       <div>
         <div class="card">
-          <div class="card-header"><span>⚖️</span> Résultat de l'analyse</div>
+          <div class="card-header"><span>⚖️</span> Résultat</div>
           <div class="card-body">
             <div id="analyse-placeholder" style="text-align:center;padding:3rem 1rem">
               <div style="font-size:3rem;margin-bottom:1rem">📋</div>
@@ -419,9 +367,7 @@
             </div>
             <div id="analyse-result" style="display:none">
               <div id="analyse-content" style="font-size:0.88rem;line-height:1.75;color:#333;white-space:pre-wrap"></div>
-              <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
-                <button class="btn-secondary" onclick="copyAnalyse()" style="flex:1">📋 Copier</button>
-              </div>
+              <button class="btn-secondary" onclick="copyAnalyse()" style="width:100%;margin-top:1rem">📋 Copier</button>
             </div>
           </div>
         </div>
@@ -508,18 +454,19 @@ const PAGE_INFO = {
   veille:    { title:'Veille juridique', sub:'Jurisprudence et actualités dans vos domaines' },
   linkedin:  { title:'Contenu LinkedIn', sub:'Posts et planning éditorial générés en 1 clic' },
   crm:       { title:'CRM Clients', sub:'Suivi dossiers, honoraires et relances automatisées' },
-  analyse:   { title:'Analyse de documents', sub:'Analysez vos documents juridiques avec l\'IA' },
+  analyse:   { title:'Analyse de documents', sub:\"Analysez vos documents juridiques avec l'IA\" },
 };
 
 function showModule(id) {
   document.querySelectorAll('.module').forEach(m => { m.classList.remove('active'); m.style.display='none'; });
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const el = document.getElementById('mod-' + id);
-  el.classList.add('active');
-  el.style.display = 'block';
+  if(el) { el.classList.add('active'); el.style.display='block'; }
   event.currentTarget.classList.add('active');
-  if(document.getElementById('page-title')) document.getElementById('page-title').textContent = PAGE_INFO[id].title;
-  if(document.getElementById('page-sub')) document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+  if(PAGE_INFO[id]) {
+    if(document.getElementById('page-title')) document.getElementById('page-title').textContent = PAGE_INFO[id].title;
+    if(document.getElementById('page-sub')) document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1032,25 +979,6 @@ function addClient() {
 }
 
 
-
-// ─── MENU MOBILE ──────────────────────────────
-function toggleMobileMenu() {
-  document.getElementById('mobile-menu').classList.toggle('open');
-}
-function mobileShowModule(id) {
-  document.getElementById('mobile-menu').classList.remove('open');
-  // Simuler le clic sur le bon bouton nav
-  document.querySelectorAll('.module').forEach(m => { m.classList.remove('active'); m.style.display='none'; });
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.mobile-menu-btn').forEach(b => b.classList.remove('active'));
-  const el = document.getElementById('mod-' + id);
-  if(el) { el.classList.add('active'); el.style.display='block'; }
-  if(document.getElementById('page-title') && PAGE_INFO[id]) {
-    document.getElementById('page-title').textContent = PAGE_INFO[id].title;
-    document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
-  }
-}
-
 // ═══════════════════════════════════════════════
 // FIREBASE AUTH
 // ═══════════════════════════════════════════════
@@ -1071,7 +999,6 @@ function toggleForm() {
   isSignup = !isSignup;
   document.getElementById('form-login').style.display = isSignup ? 'none' : 'block';
   document.getElementById('form-signup').style.display = isSignup ? 'block' : 'none';
-  document.getElementById('login-error').classList.remove('show');
 }
 function showLoginError(msg) {
   const el = document.getElementById('login-error');
@@ -1090,7 +1017,7 @@ function signupEmail() {
   const email = document.getElementById('s-email').value;
   const pass = document.getElementById('s-pass').value;
   if(!email||!pass){showLoginError('Remplissez tous les champs.');return;}
-  if(pass.length<6){showLoginError('Mot de passe trop court (6 car. min.)');return;}
+  if(pass.length<6){showLoginError('Mot de passe trop court.');return;}
   auth.createUserWithEmailAndPassword(email,pass).catch(e=>{
     if(e.code==='auth/email-already-in-use') showLoginError('Email déjà utilisé.');
     else showLoginError('Erreur : '+e.message);
@@ -1104,7 +1031,8 @@ auth.onAuthStateChanged(user => {
   if(user) {
     screen.classList.add('hidden');
     app.style.display = 'flex';
-    document.getElementById('user-email-display').textContent = user.email || user.displayName || '';
+    const emailEl = document.getElementById('user-email-display');
+    if(emailEl) emailEl.textContent = user.email || user.displayName || '';
   } else {
     screen.classList.remove('hidden');
     app.style.display = 'none';
@@ -1112,35 +1040,43 @@ auth.onAuthStateChanged(user => {
 });
 
 // ═══════════════════════════════════════════════
+// MENU MOBILE
+// ═══════════════════════════════════════════════
+function mobileGo(id) {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.querySelectorAll('.module').forEach(m => { m.classList.remove('active'); m.style.display='none'; });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('mod-' + id);
+  if(el) { el.classList.add('active'); el.style.display='block'; }
+  if(PAGE_INFO && PAGE_INFO[id]) {
+    if(document.getElementById('page-title')) document.getElementById('page-title').textContent = PAGE_INFO[id].title;
+    if(document.getElementById('page-sub')) document.getElementById('page-sub').textContent = PAGE_INFO[id].sub;
+  }
+}
+
+// ═══════════════════════════════════════════════
 // MODULE 5 : ANALYSE DE DOCUMENTS
 // ═══════════════════════════════════════════════
-let fileContent = null;
-let fileName = null;
-let fileIsBase64 = false;
-let fileType = "text";
+let fileContent = null, fileName = null, fileIsBase64 = false;
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if(file) processFile(file);
-}
+function handleFileSelect(e) { const f = e.target.files[0]; if(f) processFile(f); }
 function processFile(file) {
   fileName = file.name;
   document.getElementById('file-name').textContent = file.name;
   document.getElementById('file-info').style.display = 'block';
   document.getElementById('drop-zone').style.display = 'none';
   const reader = new FileReader();
-  const isImage = file.type.startsWith('image/');
-  const isPdf = file.type === 'application/pdf';
-  if(isImage || isPdf) {
-    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = true; fileType = isImage ? 'image' : 'pdf'; };
+  const isImg = file.type.startsWith('image/');
+  if(isImg) {
+    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = true; };
     reader.readAsDataURL(file);
   } else {
-    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = false; fileType = 'text'; };
+    reader.onload = e => { fileContent = e.target.result; fileIsBase64 = false; };
     reader.readAsText(file);
   }
 }
 function clearFile() {
-  fileContent = null; fileName = null;
+  fileContent = null; fileName = null; fileIsBase64 = false;
   document.getElementById('file-info').style.display = 'none';
   document.getElementById('drop-zone').style.display = 'block';
   document.getElementById('file-input').value = '';
@@ -1150,33 +1086,21 @@ async function analyseDocument() {
   const type = document.getElementById('analyse-type').value;
   const ctx = document.getElementById('analyse-context').value;
   const btn = document.getElementById('btn-analyse');
-  const typeLabels = {
-    assignation:"Prépare une analyse complète en vue d'une assignation. Identifie les fondements juridiques, les arguments principaux et les pièces manquantes.",
-    contrat:"Analyse ce contrat. Identifie les clauses importantes, les clauses abusives et les risques.",
-    risques:"Identifie tous les risques juridiques. Classe-les par gravité et propose des recommandations.",
-    resume:"Fais un résumé juridique structuré : parties, obligations, délais, enjeux.",
-    points:"Identifie les points clés et arguments juridiques pour préparer une plaidoirie.",
-    jurisprudence:"Identifie la jurisprudence et les textes de loi applicables."
+  const labels = {
+    assignation:"Prépare une analyse complète en vue d'une assignation.",
+    contrat:"Analyse ce contrat et identifie les clauses importantes et les risques.",
+    risques:"Identifie tous les risques juridiques classés par gravité.",
+    resume:"Fais un résumé juridique structuré.",
+    points:"Identifie les points clés et arguments pour une plaidoirie.",
+    jurisprudence:"Identifie la jurisprudence et textes de loi applicables."
   };
   document.getElementById('analyse-placeholder').style.display='none';
   document.getElementById('analyse-result').style.display='none';
   document.getElementById('analyse-loading').style.display='block';
   btn.disabled=true; btn.textContent='Analyse en cours...';
-  let requestBody;
-  if(fileIsBase64 && fileType === 'image') {
-    const base64Data = fileContent.split(',')[1];
-    const mimeType = fileContent.split(';')[0].split(':')[1];
-    requestBody = {
-      prompt: `Tu es un assistant juridique expert en droit français. ${typeLabels[type]}\n\nDocument image: "${fileName}"\n${ctx?'Instructions: '+ctx:''}\n\nAnalyse ce document image et réponds en français avec une analyse structurée et professionnelle.`,
-      image: { data: base64Data, mediaType: mimeType }
-    };
-  } else {
-    requestBody = {
-      prompt: `Tu es un assistant juridique expert en droit français. ${typeLabels[type]}\n\nDocument "${fileName}":\n${ctx?'Instructions: '+ctx+'\n':''}\n${fileContent ? fileContent.substring(0,8000) : ''}\n\nRéponds en français avec une analyse structurée et professionnelle.`
-    };
-  }
+  const prompt = `Tu es un assistant juridique expert en droit français. ${labels[type]}\n\nDocument: "${fileName}"\n${ctx?'Instructions: '+ctx+'\n':''}\nContenu:\n${fileIsBase64?'[Image uploadée]':fileContent.substring(0,8000)}\n\nRéponds en français avec une analyse structurée et professionnelle.`;
   try {
-    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requestBody)});
+    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
     const data = await res.json();
     const text = data.content?.[0]?.text || data.result || 'Erreur.';
     document.getElementById('analyse-content').textContent = text;
