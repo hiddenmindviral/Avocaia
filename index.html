@@ -6,6 +6,7 @@
   <title>AvocaIA — L'IA au service des avocats</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
@@ -74,6 +75,21 @@
     .user-info { margin-left:auto; display:flex; align-items:center; gap:0.75rem; }
     .user-email-display { font-size:0.72rem; color:rgba(255,255,255,0.4); }
     .btn-logout { background:transparent; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.5); padding:0.3rem 0.75rem; border-radius:2px; font-size:0.72rem; cursor:pointer; font-family:'Inter',sans-serif; }
+
+
+    /* ÉCRAN BLOCAGE J+10 */
+    #blocked-screen { position:fixed; inset:0; background:var(--ink); z-index:9998; display:none; align-items:center; justify-content:center; flex-direction:column; padding:2rem; }
+    #blocked-screen.show { display:flex; }
+    .blocked-card { background:var(--white); border-radius:6px; padding:2.5rem 2rem; width:100%; max-width:440px; text-align:center; }
+    .blocked-icon { font-size:3rem; margin-bottom:1rem; }
+    .blocked-title { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--ink); margin-bottom:0.75rem; }
+    .blocked-desc { font-size:0.88rem; color:var(--gray); line-height:1.65; margin-bottom:1.5rem; }
+    .blocked-plans { display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1rem; }
+    .blocked-plan { display:block; padding:0.9rem 1rem; border-radius:3px; text-decoration:none; font-size:0.88rem; font-weight:600; font-family:'Inter',sans-serif; }
+    .blocked-plan.gold { background:var(--gold); color:var(--ink); }
+    .blocked-plan.dark { background:var(--ink); color:var(--white); }
+    .blocked-plan.outline { background:transparent; border:1px solid var(--mist); color:var(--gray); }
+    .blocked-note { font-size:0.72rem; color:#aaa; line-height:1.5; }
 
     /* HAMBURGER MOBILE */
     .hamburger { background:transparent; border:none; cursor:pointer; padding:0.5rem; margin-left:auto; }
@@ -263,6 +279,22 @@
     </div>
   </div>
   <p class="login-note">Ne saisissez jamais de données client identifiables.<br>Utilisez des pseudonymes ou références de dossiers.</p>
+</div>
+
+
+<!-- ÉCRAN BLOCAGE J+10 -->
+<div id="blocked-screen">
+  <div class="blocked-card">
+    <div class="blocked-icon">⏰</div>
+    <h2 class="blocked-title">Votre période d'essai est terminée</h2>
+    <p class="blocked-desc">Vos 10 jours d'accès bêta gratuit sont écoulés. Choisissez votre formule pour continuer à utiliser AvocaIA et conserver votre tarif fondateur à -50%.</p>
+    <div class="blocked-plans">
+      <a href="https://buy.stripe.com/test_bJe4gB1jo5PT0C5b1BgEg00" target="_blank" class="blocked-plan outline">Starter — 49€/mois · Rédaction + LinkedIn</a>
+      <a href="https://buy.stripe.com/test_fZu28t9PUemp1G90mXgEg01" target="_blank" class="blocked-plan gold">Pro — 99€/mois · 4 modules · Le plus choisi ⭐</a>
+      <a href="https://buy.stripe.com/test_bJe8wRe6a4LPesV6LlgEg02" target="_blank" class="blocked-plan dark">Cabinet — 199€/mois · 5 modules · 5 utilisateurs</a>
+    </div>
+    <p class="blocked-note">🎁 En tant que membre bêta fondateur, vous bénéficiez du tarif à -50% à vie.<br>Contactez-nous : contact@avocaia.eu</p>
+  </div>
 </div>
 
 <div id="app" style="display:none">
@@ -1091,6 +1123,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 let isSignup = false;
@@ -1124,17 +1157,55 @@ function signupEmail() {
 }
 function logoutUser() { auth.signOut(); }
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   const screen = document.getElementById('login-screen');
   const app = document.getElementById('app');
+  const blocked = document.getElementById('blocked-screen');
+
   if(user) {
     screen.classList.add('hidden');
-    app.style.display = 'flex';
+
+    // Vérifier / enregistrer la date d'inscription
+    const userRef = db.collection('users').doc(user.uid);
+    const userDoc = await userRef.get();
+
+    if(!userDoc.exists) {
+      // Première connexion — enregistrer la date
+      await userRef.set({
+        email: user.email || user.displayName || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        plan: 'beta'
+      });
+      app.style.display = 'flex';
+    } else {
+      // Vérifier si J+10 est dépassé
+      const createdAt = userDoc.data().createdAt?.toDate();
+      const plan = userDoc.data().plan;
+
+      if(plan === 'paid') {
+        // Utilisateur payant — accès complet
+        app.style.display = 'flex';
+      } else if(createdAt) {
+        const diffDays = Math.floor((new Date() - createdAt) / (1000 * 60 * 60 * 24));
+        if(diffDays >= 10) {
+          // J+10 dépassé — bloquer
+          blocked.classList.add('show');
+          app.style.display = 'none';
+        } else {
+          app.style.display = 'flex';
+        }
+      } else {
+        app.style.display = 'flex';
+      }
+    }
+
     const emailEl = document.getElementById('user-email-display');
     if(emailEl) emailEl.textContent = user.email || user.displayName || '';
+
   } else {
     screen.classList.remove('hidden');
     app.style.display = 'none';
+    if(blocked) blocked.classList.remove('show');
   }
 });
 
