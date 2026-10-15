@@ -317,6 +317,7 @@
           👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('analyse')" id="nav-analyse">📄 Analyse <span class="underline"></span></button>
+        <button class="nav-btn" onclick="showModule('tribunaux')" id="nav-tribunaux">🏛️ Tribunaux <span class="underline"></span></button>
         </div>
         <button class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')" style="background:transparent;border:none;cursor:pointer;padding:0.5rem;margin-left:auto;">
           <span style="display:block;width:22px;height:2px;background:#ffffff;margin:4px 0;border-radius:2px;"></span>
@@ -479,6 +480,82 @@
   </div>
 </div>
 
+
+<!-- MODULE TRIBUNAUX -->
+<div id="mod-tribunaux" class="module">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <h2 class="page-title">🏛️ Recherche de tribunaux</h2>
+        <p class="page-sub">Trouvez le bon tribunal par code postal et type d'affaire</p>
+      </div>
+    </div>
+  </div>
+  <main>
+    <div class="output-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+      <div>
+        <div class="card">
+          <div class="card-header"><span>🔍</span> Recherche</div>
+          <div class="card-body">
+            <div class="field">
+              <label class="field-label">Code postal</label>
+              <input class="inp" type="text" id="tribunal-cp" placeholder="75001" maxlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+            </div>
+            <div class="field">
+              <label class="field-label">Type d'affaire</label>
+              <select class="inp" id="tribunal-type">
+                <option value="">Sélectionner...</option>
+                <optgroup label="Civil">
+                  <option value="civil">Tribunal judiciaire — Affaires civiles</option>
+                  <option value="commerce">Tribunal de commerce</option>
+                  <option value="prud">Conseil de prud'hommes</option>
+                  <option value="famille">Juge aux affaires familiales (JAF)</option>
+                  <option value="loyers">Tribunal des loyers commerciaux</option>
+                </optgroup>
+                <optgroup label="Pénal">
+                  <option value="correctionnel">Tribunal correctionnel</option>
+                  <option value="police">Tribunal de police</option>
+                  <option value="assises">Cour d'assises</option>
+                </optgroup>
+                <optgroup label="Administratif">
+                  <option value="admin">Tribunal administratif</option>
+                  <option value="appel_admin">Cour administrative d'appel</option>
+                </optgroup>
+                <optgroup label="Appel">
+                  <option value="appel">Cour d'appel</option>
+                </optgroup>
+                <optgroup label="Social">
+                  <option value="secu">Pôle social — Tribunal judiciaire</option>
+                </optgroup>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="rechercherTribunal()" style="width:100%">Rechercher →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><span>📍</span> Résultat</div>
+          <div class="card-body">
+            <div id="tribunal-placeholder" style="text-align:center;padding:3rem 1rem">
+              <div style="font-size:3rem;margin-bottom:1rem">🏛️</div>
+              <p style="font-size:0.88rem;color:var(--gray)">Entrez un code postal et un type d'affaire</p>
+            </div>
+            <div id="tribunal-loading" style="display:none;text-align:center;padding:2rem">
+              <div style="width:28px;height:28px;border:3px solid var(--mist);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem"></div>
+              <p style="font-size:0.85rem;color:var(--gray)">Recherche en cours...</p>
+            </div>
+            <div id="tribunal-result" style="display:none">
+              <div id="tribunal-content"></div>
+              <button class="btn-secondary" onclick="copyTribunal()" style="width:100%;margin-top:1rem">📋 Copier les informations</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <footer>
     <div class="footer-logo">Avoca<span>IA</span></div>
     <div class="footer-text">© 2026 AvocaIA · contact@avocaia.eu · Bêta</div>
@@ -558,6 +635,7 @@ const PAGE_INFO = {
   linkedin:  { title:'Contenu LinkedIn', sub:'Posts et planning éditorial générés en 1 clic' },
   crm:       { title:'CRM Clients', sub:'Suivi dossiers, honoraires et relances automatisées' },
   analyse:   { title:'Analyse de documents', sub:'Analysez vos documents juridiques avec l\'IA' },
+  tribunaux: { title:'Recherche de tribunaux', sub:'Trouvez le bon tribunal par code postal et type d\'affaire' },
 };
 
 function showModule(id) {
@@ -1287,6 +1365,104 @@ function copyAnalyse() {
   navigator.clipboard.writeText(document.getElementById('analyse-content').textContent);
   event.target.textContent='✅ Copié!';
   setTimeout(()=>event.target.textContent='📋 Copier',2000);
+}
+
+
+// ═══════════════════════════════════════════════
+// MODULE TRIBUNAUX
+// ═══════════════════════════════════════════════
+async function rechercherTribunal() {
+  const cp = document.getElementById('tribunal-cp').value.trim();
+  const type = document.getElementById('tribunal-type').value;
+  
+  if(!cp || cp.length !== 5) { alert('Merci d\'entrer un code postal valide (5 chiffres).'); return; }
+  if(!type) { alert('Merci de sélectionner un type d\'affaire.'); return; }
+
+  const typeLabels = {
+    'civil': 'Tribunal judiciaire (affaires civiles)',
+    'commerce': 'Tribunal de commerce',
+    'prud': 'Conseil de prud\'hommes',
+    'famille': 'Juge aux affaires familiales (JAF)',
+    'loyers': 'Tribunal des loyers commerciaux',
+    'correctionnel': 'Tribunal correctionnel',
+    'police': 'Tribunal de police',
+    'assises': 'Cour d\'assises',
+    'admin': 'Tribunal administratif',
+    'appel_admin': 'Cour administrative d\'appel',
+    'appel': 'Cour d\'appel',
+    'secu': 'Pôle social — Tribunal judiciaire'
+  };
+
+  document.getElementById('tribunal-placeholder').style.display = 'none';
+  document.getElementById('tribunal-result').style.display = 'none';
+  document.getElementById('tribunal-loading').style.display = 'block';
+
+  const prompt = `Tu es un expert du système judiciaire français. 
+Pour le code postal ${cp} et le type d'affaire "${typeLabels[type]}", donne-moi les informations précises du tribunal compétent.
+
+Réponds UNIQUEMENT avec ce format JSON (sans markdown, sans backticks) :
+{
+  "nom": "Nom complet du tribunal",
+  "adresse": "Adresse complète",
+  "ville": "Ville",
+  "telephone": "Numéro de téléphone",
+  "email": "Email ou formulaire de contact",
+  "horaires": "Horaires d'ouverture",
+  "juridiction": "Ressort de juridiction",
+  "conseil": "Conseil pratique pour saisir ce tribunal"
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || data.result || '';
+    
+    let info;
+    try {
+      info = JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch(e) {
+      info = null;
+    }
+
+    document.getElementById('tribunal-loading').style.display = 'none';
+    
+    if(info) {
+      document.getElementById('tribunal-content').innerHTML = `
+        <div style="margin-bottom:1rem">
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.25rem">Tribunal compétent</div>
+          <div style="font-size:1.1rem;font-family:'Playfair Display',serif;font-weight:700;color:var(--ink);margin-bottom:0.5rem">${info.nom || ''}</div>
+          <div style="font-size:0.85rem;color:var(--gray);line-height:1.6">
+            📍 ${info.adresse || ''}, ${info.ville || ''}<br>
+            📞 ${info.telephone || 'Non disponible'}<br>
+            📧 ${info.email || 'Non disponible'}<br>
+            🕐 ${info.horaires || 'Nous contacter'}<br>
+            ⚖️ <em>${info.juridiction || ''}</em>
+          </div>
+        </div>
+        <div style="background:var(--parchment);border-left:3px solid var(--gold);padding:0.85rem 1rem;border-radius:0 4px 4px 0;font-size:0.82rem;color:var(--ink);line-height:1.6">
+          💡 ${info.conseil || ''}
+        </div>
+      `;
+    } else {
+      document.getElementById('tribunal-content').innerHTML = `<p style="font-size:0.88rem;color:var(--gray);white-space:pre-wrap">${text}</p>`;
+    }
+    document.getElementById('tribunal-result').style.display = 'block';
+  } catch(e) {
+    alert('Erreur de connexion.');
+    document.getElementById('tribunal-loading').style.display = 'none';
+    document.getElementById('tribunal-placeholder').style.display = 'block';
+  }
+}
+
+function copyTribunal() {
+  const content = document.getElementById('tribunal-content').innerText;
+  navigator.clipboard.writeText(content);
+  event.target.textContent = '✅ Copié !';
+  setTimeout(() => event.target.textContent = '📋 Copier les informations', 2000);
 }
 
 // ═══════════════════════════════════════════════
