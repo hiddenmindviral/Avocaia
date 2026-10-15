@@ -101,6 +101,7 @@
     .mobile-close { position:absolute; top:1.5rem; right:1.5rem; background:transparent; border:none; color:#fff; font-size:1.8rem; cursor:pointer; line-height:1; }
     @media (max-width: 768px) {
       .nav-modules-desktop { display:none !important; }
+      #btn-tribunal-flottant { display: none; }
       .hamburger { display:flex !important; flex-direction:column !important; justify-content:center !important; align-items:center !important; }
       .beta-badge { display:none !important; }
       .user-info { display:none !important; }
@@ -151,6 +152,7 @@
     @media (max-width: 768px) {
       .bottom-nav { display: block; }
       #app { padding-bottom: 65px; }
+      #btn-tribunal-flottant { display: flex; }
     }
 
     /* FOOTER */
@@ -317,7 +319,7 @@
           👥 CRM <span class="nav-badge" id="crm-badge">0</span> <span class="underline"></span>
         </button>
         <button class="nav-btn" onclick="showModule('analyse')" id="nav-analyse">📄 Analyse <span class="underline"></span></button>
-        <button class="nav-btn" onclick="showModule('tribunaux')" id="nav-tribunaux">🏛️ Tribunaux <span class="underline"></span></button>
+        <button class="nav-btn" onclick="openTribunalModal()" id="nav-tribunaux" style="color:var(--gold)">🏛️ Tribunaux <span class="underline"></span></button>
         </div>
         <button class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')" style="background:transparent;border:none;cursor:pointer;padding:0.5rem;margin-left:auto;">
           <span style="display:block;width:22px;height:2px;background:#ffffff;margin:4px 0;border-radius:2px;"></span>
@@ -480,6 +482,48 @@
   </div>
 </div>
 
+<!-- Bouton flottant Tribunaux -->
+<button id="btn-tribunal-flottant" onclick="openTribunalModal()" style="position:fixed;bottom:75px;right:16px;z-index:50;background:var(--ink);color:var(--gold);border:1.5px solid var(--gold);border-radius:30px;padding:0.6rem 1.1rem;font-size:0.78rem;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:0.04em;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:flex;align-items:center;gap:0.4rem;">🏛️ Trouver un tribunal</button>
+
+<!-- Modal Tribunaux -->
+<div id="modal-tribunal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--white);width:100%;max-width:600px;border-radius:12px 12px 0 0;padding:1.5rem 1.25rem 2rem;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+      <div>
+        <div style="font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.2rem">Outil pratique</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink);margin:0">🏛️ Trouver le tribunal compétent</h2>
+      </div>
+      <button onclick="closeTribunalModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray);padding:0.25rem">✕</button>
+    </div>
+    <div style="margin-bottom:0.75rem">
+      <label style="font-size:0.72rem;font-weight:600;color:#555;display:block;margin-bottom:0.35rem;letter-spacing:0.03em">Code postal</label>
+      <input id="modal-tribunal-cp" class="inp" type="text" placeholder="75001" maxlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%;box-sizing:border-box" />
+    </div>
+    <div style="margin-bottom:1rem">
+      <label style="font-size:0.72rem;font-weight:600;color:#555;display:block;margin-bottom:0.35rem;letter-spacing:0.03em">Type d'affaire</label>
+      <select id="modal-tribunal-type" class="inp" style="width:100%;box-sizing:border-box">
+        <option value="civil">Tribunal judiciaire — Affaires civiles</option>
+        <option value="famille">Tribunal judiciaire — Affaires familiales (JAF)</option>
+        <option value="commerce">Tribunal de commerce</option>
+        <option value="prudhommes">Conseil de prud'hommes</option>
+        <option value="loyers">Tribunal des loyers commerciaux</option>
+        <option value="correctionnel">Tribunal correctionnel</option>
+        <option value="police">Tribunal de police</option>
+        <option value="cour-appel">Cour d'appel</option>
+        <option value="admin">Tribunal administratif</option>
+        <option value="secu">Pôle social — Tribunal judiciaire</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="rechercherTribunalModal()" style="width:100%;margin-bottom:1rem">Rechercher →</button>
+    <div id="modal-tribunal-loading" style="display:none;text-align:center;padding:1.5rem">
+      <span class="spinner"></span><span style="margin-left:0.5rem;color:var(--gray);font-size:0.88rem">Recherche en cours…</span>
+    </div>
+    <div id="modal-tribunal-result" style="display:none">
+      <div id="modal-tribunal-content"></div>
+      <button class="btn-secondary" onclick="copyTribunalModal()" style="width:100%;margin-top:0.75rem">📋 Copier les informations</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODULE TRIBUNAUX -->
 <div id="mod-tribunaux" class="module">
@@ -841,9 +885,10 @@ async function rechercherVeille() {
   const prompt = `Tu es un expert en droit français. Un avocat te pose : "${veilleQuery}"
 Réponds ainsi :
 1. **Réponse directe** (2-3 phrases)
-2. **Jurisprudence clé** (2-3 décisions récentes)
-3. **Textes applicables**
-4. **Point de vigilance**`;
+2. **Jurisprudence clé** (2-3 décisions récentes avec références exactes si connues)
+3. **Textes applicables** (codes, lois, décrets — références Légifrance si possible)
+4. **Point de vigilance**
+Cite uniquement des sources officielles (Légifrance, Cour de cassation, Conseil d'État). Ne cite pas de jurisprudence incertaine.`;
   try { veilleResult = await callClaude(prompt); } catch(e) { veilleResult='Erreur : '+e.message; }
   renderVeille();
 }
@@ -1472,6 +1517,82 @@ renderRedaction();
 renderVeille();
 renderLinkedIn();
 renderCRM();
+
+// --- Modal Tribunaux ---
+function openTribunalModal() {
+  const m = document.getElementById('modal-tribunal');
+  m.style.display = 'flex';
+  document.getElementById('modal-tribunal-result').style.display = 'none';
+  document.getElementById('modal-tribunal-loading').style.display = 'none';
+}
+function closeTribunalModal() {
+  document.getElementById('modal-tribunal').style.display = 'none';
+}
+document.getElementById('modal-tribunal').addEventListener('click', function(e) {
+  if (e.target === this) closeTribunalModal();
+});
+
+async function rechercherTribunalModal() {
+  const cp = document.getElementById('modal-tribunal-cp').value.trim();
+  const type = document.getElementById('modal-tribunal-type').value;
+  if (!cp || cp.length < 5) { alert('Veuillez entrer un code postal valide (5 chiffres)'); return; }
+  const typeLabels = {
+    'civil':'Tribunal judiciaire (affaires civiles)',
+    'famille':'Tribunal judiciaire — JAF (affaires familiales)',
+    'commerce':'Tribunal de commerce',
+    'prudhommes':'Conseil de prud\'hommes',
+    'loyers':'Tribunal des loyers commerciaux',
+    'correctionnel':'Tribunal correctionnel',
+    'police':'Tribunal de police',
+    'cour-appel':'Cour d\'appel',
+    'admin':'Tribunal administratif',
+    'secu':'Pôle social — Tribunal judiciaire'
+  };
+  document.getElementById('modal-tribunal-result').style.display = 'none';
+  document.getElementById('modal-tribunal-loading').style.display = 'block';
+  const prompt = `Pour le code postal ${cp} et le type d'affaire "${typeLabels[type]}", donne-moi les informations précises du tribunal compétent en France.
+Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
+{
+  "nom": "Nom complet du tribunal",
+  "adresse": "Adresse complète",
+  "ville": "Ville",
+  "telephone": "Numéro de téléphone ou N/A",
+  "email": "Email ou N/A",
+  "horaires": "Horaires d'ouverture",
+  "conseil": "Conseil pratique pour saisir ce tribunal"
+}`;
+  try {
+    const text = await callClaude(prompt);
+    document.getElementById('modal-tribunal-loading').style.display = 'none';
+    try {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const data = JSON.parse(jsonMatch[0]);
+      document.getElementById('modal-tribunal-content').innerHTML = `
+        <div style="background:var(--parchment);border-radius:8px;padding:1.25rem;margin-bottom:0.5rem">
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.25rem">Tribunal compétent</div>
+          <div style="font-size:1.05rem;font-weight:700;color:var(--ink);font-family:'Playfair Display',serif;margin-bottom:0.75rem">${data.nom}</div>
+          <div style="font-size:0.85rem;color:#444;line-height:1.7">
+            📍 ${data.adresse}, ${data.ville}<br>
+            📞 ${data.telephone}<br>
+            ✉️ ${data.email}<br>
+            🕐 ${data.horaires}
+          </div>
+          <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--mist);font-size:0.82rem;color:var(--gray);font-style:italic">💡 ${data.conseil}</div>
+        </div>`;
+    } catch(e) {
+      document.getElementById('modal-tribunal-content').innerHTML = `<p style="font-size:0.88rem;color:var(--gray);white-space:pre-wrap">${text}</p>`;
+    }
+    document.getElementById('modal-tribunal-result').style.display = 'block';
+  } catch(e) {
+    document.getElementById('modal-tribunal-loading').style.display = 'none';
+    alert('Erreur : ' + e.message);
+  }
+}
+
+function copyTribunalModal() {
+  const content = document.getElementById('modal-tribunal-content').innerText;
+  navigator.clipboard.writeText(content).then(() => alert('Informations copiées !'));
+}
 </script>
 </body>
 </html>
