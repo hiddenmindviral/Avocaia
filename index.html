@@ -351,6 +351,9 @@
 
     <!-- ══ MODULE 2 : VEILLE ══ -->
     <div id="mod-veille" class="module">
+      <div style="font-size:0.72rem;color:var(--gray);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.3rem;">
+        🔗 Sources officielles : <a href="https://www.legifrance.gouv.fr" target="_blank" style="color:var(--gold);text-decoration:none;font-weight:600">Légifrance</a>, Cour de cassation, Conseil d'État
+      </div>
       <div class="tabs">
         <button class="tab-btn active" onclick="veilleTab('recherche')">🔍 Recherche</button>
         <button class="tab-btn" onclick="veilleTab('bulletin')">📡 Bulletin du jour</button>
@@ -885,10 +888,9 @@ async function rechercherVeille() {
   const prompt = `Tu es un expert en droit français. Un avocat te pose : "${veilleQuery}"
 Réponds ainsi :
 1. **Réponse directe** (2-3 phrases)
-2. **Jurisprudence clé** (2-3 décisions récentes avec références exactes si connues)
-3. **Textes applicables** (codes, lois, décrets — références Légifrance si possible)
-4. **Point de vigilance**
-Cite uniquement des sources officielles (Légifrance, Cour de cassation, Conseil d'État). Ne cite pas de jurisprudence incertaine.`;
+2. **Jurisprudence clé** (2-3 décisions récentes)
+3. **Textes applicables**
+4. **Point de vigilance**`;
   try { veilleResult = await callClaude(prompt); } catch(e) { veilleResult='Erreur : '+e.message; }
   renderVeille();
 }
